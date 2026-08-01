@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>全國社區心理衛生中心地圖｜相倚傍報你知</title>
-<meta name="description" content="全台22縣市74處社區心理衛生中心查詢：地址、電話、服務轄區、交通方式與導航。由《相倚傍報你知》整理維護。">
+<title>全國社區心理衛生中心地圖｜做伙行</title>
+<meta name="description" content="全台22縣市74處社區心理衛生中心查詢：地址、電話、服務轄區、交通方式與導航。由《做伙行》整理維護。">
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#3a4a10">
@@ -32,6 +32,10 @@ header{background:var(--cream);padding:22px 28px 18px;border-bottom:1px solid va
 .brand{font-size:13px;letter-spacing:3px;color:var(--sub);font-weight:500}
 h1{font-size:24px;font-weight:900;margin-top:6px;letter-spacing:1px}
 h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-spacing:0}
+.freetag{display:inline-flex;align-items:center;gap:8px;margin-top:11px;padding:6px 14px;background:#fffdf8;border:1px solid #ded2bd;color:var(--ink);border-radius:20px;font-size:12px;letter-spacing:.3px;line-height:1.5}
+.freetag .em{font-weight:500}
+.freetag .dot{color:#c4b49a}
+@media(max-width:720px){.freetag{font-size:11px;padding:6px 12px;flex-wrap:wrap;gap:3px;border-radius:14px}.freetag .dot{display:none}.freetag .em{width:100%}}
 
 /* ── 總編輯的話 ── */
 .ednote{background:#fff;border-bottom:1px solid var(--line);padding:15px 28px;display:flex;gap:14px;align-items:flex-start}
@@ -116,6 +120,10 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 /* ── 頁尾 ── */
 footer{background:var(--cream);padding:14px 28px;font-size:12px;color:var(--sub);line-height:1.8;border-top:1px solid var(--line)}
 footer a{color:var(--ink)}
+.fnote{margin-bottom:0}
+.fnote b{color:var(--ink);font-weight:500}
+.sharenote{background:var(--ink);color:var(--cream);text-align:center;font-size:12.5px;letter-spacing:.5px;padding:11px 20px;line-height:1.7}
+@media(max-width:720px){footer{padding:13px 18px}.sharenote{font-size:11.5px;padding:10px 16px}}
 
 @media (max-width:860px){
   .main{flex-direction:column;height:auto}
@@ -129,16 +137,17 @@ footer a{color:var(--ink)}
 </head>
 <body>
 <header>
-  <div class="brand">相倚傍報你知 sann-uá-pn̄g pò lí tsai ・ 社區心衛</div>
+  <div class="brand">做伙行 ・ 社區心衛</div>
   <h1>全國社區心理衛生中心地圖<span class="cnt" id="cnt"></span></h1>
+  <div class="freetag">社區入家工作者專業促進聯盟 × AI 協作<span class="dot">・</span><span class="em">歡迎自由分享，使用時請註明出處</span></div>
 </header>
 
 <div class="ednote">
   <div class="bar"></div>
   <div class="wrap">
-    <div class="label">總編輯的話</div>
+    <div class="label">地圖編製說明</div>
     <div class="body">
-      （此處待總編輯撰寫。建議 80–150 字，可談：為什麼本期做這份地圖／自己怎麼用這份通訊錄／對「71 處」這個數字的觀察／給第一次跨縣市轉介的提醒／這份地圖沒告訴你的事。）
+      此地圖為「入人兜鬥揣路—社區入家工作者專業促進聯盟」小編之一的島編，根據衛福部公布之全國社區心理衛生中心通訊錄（1150622更新版），使用 AI 製作而成。AI 製作之社區心衛中心之資訊，均再經人工核對各縣市社區心衛中心網頁，若資訊有誤，也請大家不吝私訊小編，我再更正。
     </div>
     <div class="sign">——入人兜，鬥揣路小編・島編</div>
   </div>
@@ -168,9 +177,15 @@ footer a{color:var(--ink)}
 </div>
 
 <footer>
-  資料來源：衛福部心理健康司〈全國社區心理衛生中心通訊錄〉115年6月22日更新版（<a href="https://dep.mohw.gov.tw/domhaoh/cp-6435-70356-107.html" target="_blank" rel="noopener">原始頁面</a>）。
-  地點座標為近似位置，前往前請以電話確認。各社區心衛中心目前尚無各自的網頁或臉書粉專，本圖連結均為各縣市統一設立之心衛網頁或臉書粉專（部分附屬於衛生局網站之下）。
+  <div class="fnote">
+    <b>資料來源</b>：衛福部心理健康司〈全國社區心理衛生中心通訊錄〉115年6月22日更新版（<a href="https://dep.mohw.gov.tw/domhaoh/cp-6435-70356-107.html" target="_blank" rel="noopener">原始頁面</a>）。
+    地點座標為近似位置，前往前請以電話確認。
+  </div>
 </footer>
+
+<div class="sharenote">
+  《做伙行》・社區入家工作者專業促進聯盟　歡迎自由分享，使用時請註明出處
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
@@ -182,7 +197,13 @@ const PHOTOS = { 58: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAg
 const COUNTY_LINKS = {"新北市": {"web": "https://www.health.ntpc.gov.tw/basic/?node=19497", "fb": "https://www.facebook.com/ntpchealth", "fbLabel": "衛生局粉專"}, "臺北市": {"web": "https://mental-health.gov.taipei/", "fb": "https://www.facebook.com/taipeimentalhealth"}, "桃園市": {"web": "https://mental.tycg.gov.tw/", "fb": "https://www.facebook.com/profile.php?id=61574193644250"}, "臺中市": {"web": "https://www.health.taichung.gov.tw/26198/26327/26844/1961326/1961330/1973512/post", "fb": null}, "臺南市": {"web": "https://health.tainan.gov.tw/page.asp?mainid={6048F242-90E2-4CC2-9DAB-45D4CCB2ACAD}", "fb": "https://www.facebook.com/TainanLoveLife"}, "高雄市": {"web": "https://health.kcg.gov.tw/Content_List.aspx?n=34C5CDCD129BEA06", "fb": "https://www.facebook.com/MHC7134000"}, "宜蘭縣": {"web": "https://www.ilshb.gov.tw/News.aspx?n=15713&sms=15523", "fb": "https://www.facebook.com/ilshb", "fbLabel": "衛生局粉專"}, "新竹縣": {"web": "https://www.hcshb.gov.tw/News_Content.aspx?n=690&s=91980", "fb": "https://www.facebook.com/CommunityMentalHealthCenter"}, "苗栗縣": {"web": "https://www.mlshb.gov.tw/nc/content-list?tag=187&idNavigations=46", "fb": "https://www.facebook.com/mal.nodrug", "fbLabel": "心理健康中心粉專"}, "彰化縣": {"web": "https://center.chshb.gov.tw/aboutus.asp#2", "fb": null}, "南投縣": {"web": "https://reurl.cc/Z15LoQ", "fb": "https://www.facebook.com/profile.php?id=100064683703392"}, "雲林縣": {"web": "https://ylshb.yunlin.gov.tw/cp.aspx?n=15617", "fb": null}, "嘉義縣": {"web": "https://cyshb.cyhg.gov.tw/cmhc", "fb": "https://www.facebook.com/cyshbcmhc"}, "屏東縣": {"web": "https://reurl.cc/OEadp9", "fb": null}, "臺東縣": {"web": "https://www.ttshb.gov.tw/Tmhc", "fb": "https://www.facebook.com/profile.php?id=100078207022860"}, "花蓮縣": {"web": "http://dapc.hlshb.gov.tw/mentalHealth/", "fb": "https://www.facebook.com/profile.php?id=100063696260152"}, "基隆市": {"web": "https://www.klchb.klcg.gov.tw/tw/klchb/1370.html", "fb": null}, "新竹市": {"web": "https://shc.hccg.gov.tw", "fb": null}, "嘉義市": {"web": "https://mental.chiayi.gov.tw", "fb": "https://www.facebook.com/warmheartpig"}, "澎湖縣": {"web": "https://www.phchb.gov.tw/home.jsp?id=142", "fb": "https://www.facebook.com/profile.php?id=100064046132849"}, "金門縣": {"web": "https://phb.kinmen.gov.tw/Content_List.aspx?n=1E8085DB69373A96", "fb": null}, "連江縣": {"web": "https://www.matsuhb.gov.tw/Chhtml/content/684?webaid=2", "fb": null}};
 const CITY_ORDER = ['臺北市','新北市','基隆市','桃園市','新竹市','新竹縣','宜蘭縣','苗栗縣','臺中市','彰化縣','南投縣','雲林縣','嘉義市','嘉義縣','臺南市','高雄市','屏東縣','花蓮縣','臺東縣','澎湖縣','金門縣','連江縣'];
 
-const map = L.map('map',{scrollWheelZoom:true}).setView([23.7,120.96],8);
+const TW_BOUNDS = L.latLngBounds([21.5, 117.8], [26.6, 122.4]);
+const map = L.map('map',{
+  scrollWheelZoom:true,
+  minZoom:7,
+  maxBounds: TW_BOUNDS,
+  maxBoundsViscosity: 0.9
+}).setView([23.7,120.96],8);
 const TILES = [
   { url:'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
     opt:{ attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>', subdomains:'abcd', maxZoom:19 } },
@@ -247,13 +268,6 @@ function getGroup(city, region){
 
 function telHref(t){ const m = t.match(/[\d\-()（）]{7,}/); return m? 'tel:'+m[0].replace(/[^\d]/g,'') : null; }
 
-function countyNote(city){
-  const L0 = COUNTY_LINKS[city]||{};
-  let parts = [];
-  if(L0.web) parts.push(`<a href="${L0.web}" target="_blank" rel="noopener" style="color:#3d5a86;font-weight:500">縣市設立之網頁</a>`);
-  if(L0.fb)  parts.push(`<a href="${L0.fb}" target="_blank" rel="noopener" style="color:#3d5a86;font-weight:500">${L0.fbLabel||'臉書粉專'}</a>`);
-  return `各中心尚無各自網頁或臉書粉專，歡迎瀏覽${parts.join('或')}`;
-}
 function popupHtml(d){
   const c = RC[d.region];
   const th = telHref(d.tel);
@@ -305,8 +319,7 @@ function buildList(items){
     if(L1.fb)  cbtn += `<a class="btn btn-fb" href="${L1.fb}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${L1.fbLabel||'臉書粉專'} ↗</a>`;
     const strip = document.createElement('div');
     strip.style.cssText = 'padding:11px 20px 12px 40px;background:#fdfaf5;border-top:1px dashed var(--line)';
-    strip.innerHTML = `<div class="card-links" style="margin-top:0">${cbtn}</div>
-      <div style="font-size:11.5px;color:#b0a08c;margin-top:7px;line-height:1.6">各中心尚無各自網頁或臉書粉專，歡迎瀏覽縣市設立之網頁或臉書粉專</div>`;
+    strip.innerHTML = `<div class="card-links" style="margin-top:0">${cbtn}</div>`;
     body.appendChild(strip);
     arr.forEach(d=>{
       const card = document.createElement('div'); card.className='card'; card.id='card-'+d.id;
