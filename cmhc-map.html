@@ -38,33 +38,27 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 @media(max-width:720px){.freetag{font-size:11px;padding:6px 12px;flex-wrap:wrap;gap:3px;border-radius:14px}.freetag .dot{display:none}.freetag .em{width:100%}.caretag{font-size:12px}}
 
 /* ── 工具列 ── */
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1002}
-.tb-section{flex:1;min-width:240px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;align-content:flex-start}
-.tb-section + .tb-section{border-left:1px solid var(--line);padding-left:18px}
-.tb-label{flex-basis:100%;font-size:12px;font-weight:700;color:var(--sub);letter-spacing:1px;margin-bottom:2px}
-.tb-label-row{display:flex;align-items:center;gap:8px;flex-basis:100%;margin-bottom:2px}
-.tb-label-row .tb-label{flex-basis:auto;margin-bottom:0}
-.locate-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--sub);background:var(--ink);color:#fff;cursor:pointer;padding:0;transition:opacity .15s;flex-shrink:0}
+.toolbar{display:flex;flex-direction:column;gap:0;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1002}
+.filterbar{display:flex;align-items:center;gap:8px;padding:10px 18px}
+.hscroll-chips{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:2px 0}
+.hscroll-chips::-webkit-scrollbar{display:none}
+.search-toggle-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:30px;padding:0 10px;border-radius:15px;border:1.5px solid var(--line);background:transparent;color:var(--sub);cursor:pointer;flex-shrink:0;transition:background .15s,color .15s;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap}
+.search-toggle-btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.search-toggle-label{letter-spacing:.3px}
+.locate-icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:30px;padding:0 11px;border-radius:15px;border:1.5px solid var(--sub);background:var(--ink);color:#fff;cursor:pointer;transition:opacity .15s;flex-shrink:0;font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap}
 .locate-icon-btn:hover{opacity:.8}
 .locate-icon-btn:disabled{opacity:.45;cursor:wait}
+.locate-icon-btn.loading svg{animation:spin .8s linear infinite}
+.locate-label{letter-spacing:.3px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.select-row{display:flex;gap:8px;padding:0 18px 10px;flex-wrap:wrap}
 .search{flex:1;min-width:200px;position:relative}
 .search input{width:100%;padding:9px 14px 9px 36px;border:1.5px solid var(--line);border-radius:20px;font-size:14px;font-family:inherit;background:#fdfaf5;outline:none;transition:border-color .15s}
 .search input:focus{border-color:var(--sub)}
 .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--sub)}
-.quickpick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-basis:100%}
-.quickpick .qp-label{font-size:12.5px;color:var(--sub);font-weight:500;white-space:nowrap}
-.qsel{padding:8px 12px;border:1.5px solid var(--line);border-radius:16px;font-size:14px;font-family:inherit;background:#fdfaf5;color:var(--ink);cursor:pointer;outline:none;transition:border-color .15s}
+.qsel{padding:8px 12px;border:1.5px solid var(--line);border-radius:16px;font-size:14px;font-family:inherit;background:#fdfaf5;color:var(--ink);cursor:pointer;outline:none;transition:border-color .15s;flex:1;min-width:120px}
 .qsel:focus{border-color:var(--sub)}
 .qsel:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:520px){
-  .quickpick{gap:6px}
-  .quickpick .qp-label{flex-basis:100%;font-size:12px}
-  .qsel{flex:1;min-width:0;font-size:13px;padding:8px 10px}
-}
-.locate-btn{padding:8px 16px;border-radius:20px;border:none;background:var(--ink);color:#fff;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:opacity .15s}
-.locate-btn:hover{opacity:.85}
-.locate-btn:disabled{opacity:.55;cursor:wait}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{padding:6px 14px;border-radius:16px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-family:inherit;cursor:pointer;color:var(--sub);font-weight:500;transition:all .15s}
 .chip.on{color:#fff;border-color:transparent}
@@ -169,13 +163,11 @@ footer a{color:var(--ink)}
   .caretag{font-size:11.5px;margin-top:6px}
   .freetag{display:none}
   .freetag-m{display:block}
-  .toolbar{padding:10px 16px;gap:6px;position:static;flex-direction:column}
-  .tb-section{min-width:0;flex-basis:100%;padding:10px 0}
-  .tb-section + .tb-section{border-left:none;padding-left:0;border-top:1px dashed var(--line)}
-  .tb-label{font-size:13px;margin-bottom:4px}
-  .search input{padding:8px 14px 8px 34px;font-size:13px}
-  .locate-btn{font-size:12px;padding:7px 14px}
+  .toolbar{position:static}
+  .filterbar{padding:8px 14px}
+  .search-row,.select-row{padding:0 14px 8px}
   .chip{padding:5px 11px;font-size:12px}
+  .qsel{font-size:13px;padding:7px 10px}
   /* 手機分頁：地圖／清單一次只顯示一個，避免擠在一起 */
   .viewtabs{display:flex}
   .main .panel{display:none}
@@ -208,36 +200,37 @@ footer a{color:var(--ink)}
 </header>
 
 <div class="toolbar">
-  <div class="tb-section">
-    <div class="tb-label-row">
-      <span class="tb-label">📍 定位搜尋</span>
-      <button id="locateBtn" class="locate-icon-btn" type="button" title="找離我最近的中心" aria-label="找離我最近的中心">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/></svg>
-      </button>
-    </div>
-    <div class="quickpick">
-      <span class="qp-label">選擇所在地區：</span>
-      <select id="countySel" class="qsel" aria-label="選擇縣市">
-        <option value="">請選擇縣市</option>
-      </select>
-      <select id="districtSel" class="qsel" aria-label="選擇鄉鎮市區" disabled>
-        <option value="">請先選縣市</option>
-      </select>
-    </div>
-    <div class="search">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
-      <input id="q" type="search" placeholder="手動輸入鄉鎮市區或轄區（例：石門、大武）" autocomplete="off">
-    </div>
-  </div>
-  <div class="tb-section">
-    <div class="tb-label">🗺️ 分區瀏覽</div>
-    <div class="chips">
+  <!-- 第一列：定位按鈕 + 橫滑 Chip + 搜尋展開 -->
+  <div class="filterbar">
+    <button id="locateBtn" class="locate-icon-btn" type="button" title="找離我最近的中心" aria-label="找離我最近的中心">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/></svg>
+      <span class="locate-label">找最近</span>
+    </button>
+    <div class="hscroll-chips">
       <button class="chip on" data-r="all">全部</button>
       <button class="chip" data-r="north">北部</button>
       <button class="chip" data-r="central">中部</button>
       <button class="chip" data-r="south">南部</button>
       <button class="chip" data-r="east">東部</button>
       <button class="chip" data-r="island">離島</button>
+    </div>
+    <button id="searchToggle" class="search-toggle-btn" type="button" title="搜尋" aria-label="展開搜尋">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+      <span class="search-toggle-label">搜尋</span>
+    </button>
+  </div>
+  <!-- 第二列：縣市 + 鄉鎮下拉 + 手動搜尋（選了大區才出現） -->
+  <div class="select-row" id="selectRow" hidden>
+    <select id="countySel" class="qsel" aria-label="選擇縣市">
+      <option value="">請選擇縣市</option>
+    </select>
+    <select id="districtSel" class="qsel" aria-label="選擇鄉鎮市區" disabled>
+      <option value="">請先選縣市</option>
+    </select>
+    <!-- 手動輸入（展開搜尋後顯示，在下拉之後） -->
+    <div class="search" id="searchRow" hidden style="flex-basis:100%">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+      <input id="q" type="search" placeholder="輸入鄉鎮市區（例：石門、大武）" autocomplete="off">
     </div>
   </div>
 </div>
@@ -643,27 +636,68 @@ function apply(){
 }
 const countySel = document.getElementById('countySel');
 const districtSel = document.getElementById('districtSel');
+const selectRow = document.getElementById('selectRow');
+const searchRow = document.getElementById('searchRow');
+const searchToggle = document.getElementById('searchToggle');
+
+/* 各大區包含的縣市（用來選了 Chip 後過濾縣市下拉） */
+const REGION_CITIES = {
+  north:   ['臺北市','新北市','基隆市','桃園市','新竹市','新竹縣','宜蘭縣'],
+  central: ['苗栗縣','臺中市','彰化縣','南投縣','雲林縣'],
+  south:   ['嘉義市','嘉義縣','臺南市','高雄市','屏東縣'],
+  east:    ['花蓮縣','臺東縣'],
+  island:  ['澎湖縣','金門縣','連江縣'],
+};
 
 function resetQuickpick(){
   qCity=''; countySel.value=''; districtSel.disabled=true;
   districtSel.innerHTML='<option value="">請先選縣市</option>';
 }
 
+function rebuildCountySel(regionCities){
+  countySel.innerHTML='<option value="">請選縣市</option>';
+  (regionCities||CITY_ORDER).filter(c=>DIST_BY_CITY[c]).forEach(c=>{
+    const o=document.createElement('option'); o.value=c; o.textContent=c;
+    countySel.appendChild(o);
+  });
+}
+
+/* 搜尋展開按鈕 */
+searchToggle.addEventListener('click',()=>{
+  const open = searchRow.hasAttribute('hidden');
+  if(open){
+    selectRow.removeAttribute('hidden');   // 確保外層容器也展開
+    searchRow.removeAttribute('hidden');
+    searchToggle.classList.add('on');
+    document.getElementById('q').focus();
+  } else {
+    searchRow.setAttribute('hidden','');
+    searchToggle.classList.remove('on');
+    document.getElementById('q').value=''; q=''; apply();
+    // 若沒有選大區，把 selectRow 也收起來
+    if(region==='all') selectRow.setAttribute('hidden','');
+  }
+});
+
 document.getElementById('q').addEventListener('input',e=>{
   q=e.target.value; resetQuickpick(); apply();
 });
+
 document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
   ch.classList.add('on'); region=ch.dataset.r; resetQuickpick(); apply();
   const centers={north:[[24.85,121.35],9],central:[[24.05,120.75],9],south:[[22.9,120.4],9],east:[[23.35,121.3],8],island:[[24.2,119.5],7]};
   if(region==='all'){
+    selectRow.setAttribute('hidden','');
     flyHome(.8);
   } else {
+    rebuildCountySel(REGION_CITIES[region]);
+    selectRow.removeAttribute('hidden');
     const [c,z]=centers[region]; map.flyTo(c,z,{duration:.8});
   }
 }));
 
-/* ── 縣市／鄉鎮市區快捷選單（給不習慣打字的使用者） ── */
+/* ── 縣市／鄉鎮市區快捷選單 ── */
 const DIST_BY_CITY = {};
 DATA.forEach(d=>{
   const list = (DIST_BY_CITY[d.city] = DIST_BY_CITY[d.city] || []);
@@ -671,11 +705,7 @@ DATA.forEach(d=>{
     if(!list.includes(t)) list.push(t);
   });
 });
-CITY_ORDER.forEach(c=>{
-  const opt = document.createElement('option');
-  opt.value=c; opt.textContent=c;
-  countySel.appendChild(opt);
-});
+rebuildCountySel(null);   // 初始：填入全部縣市
 
 function openCountyInList(city){
   const el = document.querySelector('.county[data-city="'+city+'"]');
@@ -685,8 +715,6 @@ function openCountyInList(city){
 countySel.addEventListener('change', ()=>{
   const city = countySel.value;
   document.getElementById('q').value=''; q='';
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  document.querySelector('.chip[data-r="all"]').classList.add('on'); region='all';
   districtSel.innerHTML='';
   if(!city){
     qCity='';
@@ -733,7 +761,7 @@ locateBtn.addEventListener('click', ()=>{
     return;
   }
   locateBtn.disabled = true;
-  locateBtn.style.animation='spin .8s linear infinite';
+  locateBtn.classList.add('loading');
   navigator.geolocation.getCurrentPosition(
     pos=>{
       const {latitude:lat, longitude:lng} = pos.coords;
@@ -742,13 +770,14 @@ locateBtn.addEventListener('click', ()=>{
         const dist = haversineKm(lat,lng,d.lat,d.lng);
         if(dist<minDist){ minDist=dist; nearest=d; }
       });
-      locateBtn.disabled=false; locateBtn.style.animation='';
+      locateBtn.disabled=false; locateBtn.classList.remove('loading');
       if(!nearest) return;
       // 重置目前的篩選條件，確保找到的中心不會被擋住
       region='all'; q=''; qCity='';
       document.getElementById('q').value='';
       document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
       document.querySelector('.chip[data-r="all"]').classList.add('on');
+      selectRow.setAttribute('hidden','');
       resetQuickpick();
       apply();
       openCountyInList(nearest.city);
@@ -760,7 +789,7 @@ locateBtn.addEventListener('click', ()=>{
       },1050);
     },
     err=>{
-      locateBtn.disabled=false; locateBtn.style.animation='';
+      locateBtn.disabled=false; locateBtn.classList.remove('loading');
       let msg='無法取得您的位置，請確認已允許瀏覽器使用定位功能，或改用上方搜尋查詢。';
       if(err.code===err.PERMISSION_DENIED) msg='您已拒絕定位權限，請至瀏覽器設定允許後再試一次，或改用上方搜尋查詢。';
       alert(msg);
