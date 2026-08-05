@@ -302,8 +302,8 @@ const CITY_ORDER = ['臺北市','新北市','基隆市','桃園市','新竹市',
 // 避免露出過多中國沿岸；東、南界含蘭嶼、綠島與周邊海域
 const TW_BOUNDS = L.latLngBounds([21.75, 118.15], [26.35, 122.10]);
 // 手機初始畫面：用中心點＋縮放等級，讓台灣本島填滿窄長螢幕，不帶入中國沿海
-const TW_MOBILE_CENTER = [23.65, 120.95];  // 台灣本島地理中心偏北一點
-const TW_MOBILE_ZOOM = 7.3;
+const TW_MOBILE_CENTER = [23.75, 121.15];  // 中心偏東北，讓東部縣市完整入鏡、減少西側海域
+const TW_MOBILE_ZOOM = 7.5;
 const isMobile = ()=>window.matchMedia('(max-width:860px)').matches;
 const map = L.map('map',{
   scrollWheelZoom:true,
