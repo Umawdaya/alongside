@@ -301,13 +301,14 @@ const CITY_ORDER = ['臺北市','新北市','基隆市','桃園市','新竹市',
 // 地圖可視與拖曳範圍：西界收至剛好容納金門（118.15），北界容納連江（26.35），
 // 避免露出過多中國沿岸；東、南界含蘭嶼、綠島與周邊海域
 const TW_BOUNDS = L.latLngBounds([21.75, 118.15], [26.35, 122.10]);
-// 手機初始畫面聚焦台灣本島（不含金門連江），避免畫面偏向大陸沿海
 // 手機初始畫面：用中心點＋縮放等級，讓台灣本島填滿窄長螢幕，不帶入中國沿海
 const TW_MOBILE_CENTER = [23.65, 120.95];  // 台灣本島地理中心偏北一點
 const TW_MOBILE_ZOOM = 7.3;
+const isMobile = ()=>window.matchMedia('(max-width:860px)').matches;
 const map = L.map('map',{
   scrollWheelZoom:true,
   minZoom:6,
+  zoomSnap:0.1,          // 允許 7.3 這類非整數縮放等級
   maxBounds: TW_BOUNDS,
   maxBoundsViscosity: 1.0
 });
@@ -316,7 +317,6 @@ function flyHome(dur){
   else { map.flyToBounds(TW_BOUNDS, {padding:[20,20], duration:dur||.7}); }
 }
 if(isMobile()){ map.setView(TW_MOBILE_CENTER, TW_MOBILE_ZOOM); } else { map.fitBounds(TW_BOUNDS, {padding:[20,20]}); }
-const isMobile = ()=>window.matchMedia('(max-width:860px)').matches;
 const TILES = [
   { url:'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
     opt:{ attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>', subdomains:'abcd', maxZoom:19 } },
