@@ -106,6 +106,7 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 .btn-tel{background:var(--cream);color:var(--ink)}
 .btn-nav{background:#e0e8d6;color:#3a4a10}
 .btn-line{background:#06C755;color:#fff}
+.btn-share{background:#f0e6d8;color:#6b5535;border:none;cursor:pointer;font-family:inherit}
 
 /* ── 地圖標記與泡泡 ── */
 .pin{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
@@ -302,7 +303,7 @@ const CITY_ORDER = ['臺北市','新北市','基隆市','桃園市','新竹市',
 // 避免露出過多中國沿岸；東、南界含蘭嶼、綠島與周邊海域
 const TW_BOUNDS = L.latLngBounds([21.75, 118.15], [26.35, 122.10]);
 // 手機初始畫面：用中心點＋縮放等級，讓台灣本島填滿窄長螢幕，不帶入中國沿海
-const TW_MOBILE_CENTER = [23.75, 121.15];  // 中心偏東北，讓東部縣市完整入鏡、減少西側海域
+const TW_MOBILE_CENTER = [23.85, 121.35];  // 中心偏東北，讓臺北、宜蘭、花東完整入鏡
 const TW_MOBILE_ZOOM = 7.5;
 const isMobile = ()=>window.matchMedia('(max-width:860px)').matches;
 const map = L.map('map',{
@@ -419,7 +420,59 @@ function actionLinksHtml(d){
   const navBtn = `<a class="btn btn-nav" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.addr)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📍 導航</a>`;
   const webBtn = d.web ? `<a class="btn btn-web" href="${d.web}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 網頁</a>` : '';
   const lineBtn = d.line ? `<a class="btn btn-line" href="https://line.me/R/ti/p/${d.line}" target="_blank" rel="noopener" onclick="event.stopPropagation()">💬 LINE</a>` : '';
-  return telBtn + navBtn + webBtn + lineBtn;
+  const shareBtn = `<button class="btn btn-share" type="button" data-share="${d.id}" onclick="event.stopPropagation();shareCenter(${d.id})">↗ 分享</button>`;
+  return telBtn + navBtn + webBtn + lineBtn + shareBtn;
+}
+
+/* 分享單一中心資訊：優先用系統分享面板（手機），否則複製到剪貼簿 */
+function shareCenter(id){
+  const d = DATA.find(x=>x.id===id);
+  if(!d) return;
+  const lines = [
+    d.name,
+    `服務區域：${d.area||'—'}`,
+    `地址：${d.addr}${d.addrNote?`（${d.addrNote}）`:''}`,
+  ];
+  if(d.hours) lines.push(`服務時間：${d.hours}`);
+  lines.push(`${d.hours?'諮詢專線':'電話'}：${d.tel}`);
+  if(d.web) lines.push(`網頁：${d.web}`);
+  if(d.line) lines.push(`LINE：https://line.me/R/ti/p/${d.line}`);
+  lines.push('');
+  lines.push(`地圖：${location.origin}${location.pathname}`);
+  lines.push('（資料來源：全國社區心理衛生中心地圖・做伙行）');
+  const text = lines.join('\n');
+  const title = d.name;
+  if(navigator.share){
+    navigator.share({title, text}).catch(()=>{});
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      toast('已複製中心資訊，可貼上分享');
+    }).catch(()=>{ fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('已複製中心資訊，可貼上分享');
+  }catch(e){ toast('複製失敗，請手動選取'); }
+}
+let _toastTimer;
+function toast(msg){
+  let t = document.getElementById('toast');
+  if(!t){
+    t = document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:rgba(45,42,38,.94);color:#fff;padding:11px 20px;border-radius:22px;font-size:14px;z-index:3000;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .25s;pointer-events:none;max-width:86vw;text-align:center';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  requestAnimationFrame(()=>{ t.style.opacity='1'; });
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{ t.style.opacity='0'; }, 2200);
 }
 
 function popupHtml(d){
