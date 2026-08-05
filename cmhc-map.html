@@ -49,7 +49,11 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 .qsel{padding:8px 12px;border:1.5px solid var(--line);border-radius:16px;font-size:14px;font-family:inherit;background:#fdfaf5;color:var(--ink);cursor:pointer;outline:none;transition:border-color .15s}
 .qsel:focus{border-color:var(--sub)}
 .qsel:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:520px){.qsel{flex:1;min-width:0}}
+@media(max-width:520px){
+  .quickpick{gap:6px}
+  .quickpick .qp-label{flex-basis:100%;font-size:12px}
+  .qsel{flex:1;min-width:0;font-size:13px;padding:8px 10px}
+}
 .locate-btn{padding:8px 16px;border-radius:20px;border:none;background:var(--ink);color:#fff;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:opacity .15s}
 .locate-btn:hover{opacity:.85}
 .locate-btn:disabled{opacity:.55;cursor:wait}
@@ -147,11 +151,16 @@ footer a{color:var(--ink)}
 
 @media (max-width:860px){
   .main{flex-direction:column;height:auto}
-  #map{height:72vh;min-height:400px}
+  #map{height:80vh;min-height:420px}
   .panel{max-width:none;min-width:0;border-left:none;border-top:1px solid var(--line);max-height:none}
-  header{padding:16px 18px 12px}
-  .toolbar{padding:10px 18px;position:static}
-  h1{font-size:20px}
+  header{padding:12px 16px 10px}
+  h1{font-size:18px;margin-top:4px}
+  .caretag{font-size:11.5px;margin-top:6px}
+  .freetag{margin-top:6px;padding:5px 12px;font-size:10.5px}
+  .toolbar{padding:10px 16px;gap:8px;position:static}
+  .search input{padding:8px 14px 8px 34px;font-size:13px}
+  .locate-btn{font-size:12px;padding:7px 14px}
+  .chip{padding:5px 11px;font-size:12px}
   /* 手機分頁：地圖／清單一次只顯示一個，避免擠在一起 */
   .viewtabs{display:flex}
   .main .panel{display:none}
@@ -277,14 +286,18 @@ const CITY_ORDER = ['臺北市','新北市','基隆市','桃園市','新竹市',
 // 地圖可視與拖曳範圍：西界收至剛好容納金門（118.15），北界容納連江（26.35），
 // 避免露出過多中國沿岸；東、南界含蘭嶼、綠島與周邊海域
 const TW_BOUNDS = L.latLngBounds([21.75, 118.15], [26.35, 122.10]);
+// 手機初始畫面聚焦台灣本島（不含金門連江），避免畫面偏向大陸沿海
+const TW_MAIN = L.latLngBounds([21.85, 119.90], [25.35, 122.05]);
 const map = L.map('map',{
   scrollWheelZoom:true,
   minZoom:6,
   maxBounds: TW_BOUNDS,
   maxBoundsViscosity: 1.0
 });
-// 初始畫面：自動縮放至完整涵蓋全島與離島（含金門、連江、澎湖）
-map.fitBounds(TW_BOUNDS, {padding:[20,20]});
+// 初始畫面：手機聚焦本島，桌面完整涵蓋全島與離島
+const _initBounds = window.matchMedia('(max-width:860px)').matches ? TW_MAIN : TW_BOUNDS;
+map.fitBounds(_initBounds, {padding:[20,20]});
+const isMobile = ()=>window.matchMedia('(max-width:860px)').matches;
 const TILES = [
   { url:'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
     opt:{ attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>', subdomains:'abcd', maxZoom:19 } },
@@ -459,7 +472,7 @@ function buildList(items){
       co.classList.toggle('open');
       if(!opening){                          // 收合時回到全圖檢視
         clearFocusPins();
-        map.flyToBounds(TW_BOUNDS, {padding:[20,20], duration:.7});
+        map.flyToBounds(isMobile()?TW_MAIN:TW_BOUNDS, {padding:[20,20], duration:.7});
         return;
       }
       focusCounty(cName);
@@ -560,7 +573,7 @@ document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{
   ch.classList.add('on'); region=ch.dataset.r; resetQuickpick(); apply();
   const centers={north:[[24.85,121.35],9],central:[[24.05,120.75],9],south:[[22.9,120.4],9],east:[[23.35,121.3],8],island:[[24.2,119.5],7]};
   if(region==='all'){
-    map.flyToBounds(TW_BOUNDS, {padding:[20,20], duration:.8});
+    map.flyToBounds(isMobile()?TW_MAIN:TW_BOUNDS, {padding:[20,20], duration:.8});
   } else {
     const [c,z]=centers[region]; map.flyTo(c,z,{duration:.8});
   }
@@ -597,7 +610,7 @@ countySel.addEventListener('change', ()=>{
     districtSel.innerHTML = '<option value="">請先選縣市</option>';
     apply();
     clearFocusPins();
-    map.flyToBounds(TW_BOUNDS, {padding:[20,20], duration:.7});
+    map.flyToBounds(isMobile()?TW_MAIN:TW_BOUNDS, {padding:[20,20], duration:.7});
     return;
   }
   qCity = city;
@@ -686,13 +699,12 @@ panelToggle.addEventListener('click', ()=>{
     map.invalidateSize();
     if(collapsed){
       clearFocusPins();
-      map.flyToBounds(TW_BOUNDS, {padding:[20,20], duration:.6});   // 收合時回到全圖檢視
+      map.flyToBounds(isMobile()?TW_MAIN:TW_BOUNDS, {padding:[20,20], duration:.6});   // 收合時回到全圖檢視
     }
   }, 320);
 });
 
 /* ───────── 手機分頁：地圖／清單切換 ───────── */
-const isMobile = ()=>window.matchMedia('(max-width:860px)').matches;
 const tabMap  = document.getElementById('tabMap');
 const tabList = document.getElementById('tabList');
 function setMobileView(view){   // 'map' 或 'list'
