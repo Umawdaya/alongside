@@ -33,14 +33,16 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 .freetag{display:inline-flex;align-items:center;gap:8px;margin-top:11px;padding:6px 14px;background:#fffdf8;border:1px solid #ded2bd;color:var(--ink);border-radius:20px;font-size:12px;letter-spacing:.3px;line-height:1.5}
 .freetag .em{font-weight:500}
 .freetag .dot{color:#c4b49a}
+.freetag-m{display:none;margin-top:6px;font-size:11px;color:var(--sub);letter-spacing:.3px}
 .caretag{margin-top:9px;font-size:13px;color:#4a5520;line-height:1.6;font-weight:500}
 @media(max-width:720px){.freetag{font-size:11px;padding:6px 12px;flex-wrap:wrap;gap:3px;border-radius:14px}.freetag .dot{display:none}.freetag .em{width:100%}.caretag{font-size:12px}}
 
-/* ── 總編輯的話 ── */
-
 /* ── 工具列 ── */
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1002}
-.search{flex:1;min-width:220px;position:relative}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1002}
+.tb-section{flex:1;min-width:240px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;align-content:flex-start}
+.tb-section + .tb-section{border-left:1px solid var(--line);padding-left:18px}
+.tb-label{flex-basis:100%;font-size:12px;font-weight:700;color:var(--sub);letter-spacing:1px;margin-bottom:2px}
+.search{flex:1;min-width:200px;position:relative}
 .search input{width:100%;padding:9px 14px 9px 36px;border:1.5px solid var(--line);border-radius:20px;font-size:14px;font-family:inherit;background:#fdfaf5;outline:none;transition:border-color .15s}
 .search input:focus{border-color:var(--sub)}
 .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--sub)}
@@ -154,10 +156,15 @@ footer a{color:var(--ink)}
   #map{height:80vh;min-height:420px}
   .panel{max-width:none;min-width:0;border-left:none;border-top:1px solid var(--line);max-height:none}
   header{padding:12px 16px 10px}
-  h1{font-size:18px;margin-top:4px}
+  .brand{display:none}
+  h1{font-size:18px;margin-top:0}
   .caretag{font-size:11.5px;margin-top:6px}
-  .freetag{margin-top:6px;padding:5px 12px;font-size:10.5px}
-  .toolbar{padding:10px 16px;gap:8px;position:static}
+  .freetag{display:none}
+  .freetag-m{display:block}
+  .toolbar{padding:10px 16px;gap:6px;position:static;flex-direction:column}
+  .tb-section{min-width:0;flex-basis:100%;padding:10px 0}
+  .tb-section + .tb-section{border-left:none;padding-left:0;border-top:1px dashed var(--line)}
+  .tb-label{font-size:13px;margin-bottom:4px}
   .search input{padding:8px 14px 8px 34px;font-size:13px}
   .locate-btn{font-size:12px;padding:7px 14px}
   .chip{padding:5px 11px;font-size:12px}
@@ -189,30 +196,37 @@ footer a{color:var(--ink)}
   <h1>全國社區心理衛生中心地圖<span class="cnt" id="cnt"></span></h1>
   <div class="caretag">如果您或您的家人最近遇到情緒困擾、精神健康或危機等狀況，或是想知道社區心理衛生中心的服務項目，歡迎查詢離您最近的中心資訊</div>
   <div class="freetag">社區入家工作者專業促進聯盟 × AI 協作<span class="dot">・</span><span class="em">歡迎自由分享，使用時請註明出處</span></div>
+  <div class="freetag-m">編製單位請參考底部說明</div>
 </header>
 
 <div class="toolbar">
-  <div class="search">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
-    <input id="q" type="search" placeholder="搜尋中心、鄉鎮市區或服務轄區（例：石門、新豐、埔里、阿里山、恆春、豐濱）" autocomplete="off">
+  <div class="tb-section">
+    <div class="tb-label">📍 定位搜尋</div>
+    <button id="locateBtn" class="locate-btn" type="button">📍 找離我最近的中心</button>
+    <div class="quickpick">
+      <span class="qp-label">選擇所在地區：</span>
+      <select id="countySel" class="qsel" aria-label="選擇縣市">
+        <option value="">請選擇縣市</option>
+      </select>
+      <select id="districtSel" class="qsel" aria-label="選擇鄉鎮市區" disabled>
+        <option value="">請先選縣市</option>
+      </select>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+      <input id="q" type="search" placeholder="手動輸入鄉鎮市區或轄區（例：石門、大武）" autocomplete="off">
+    </div>
   </div>
-  <button id="locateBtn" class="locate-btn" type="button">📍 找離我最近的中心</button>
-  <div class="quickpick">
-    <span class="qp-label">📍 不想打字？直接選：</span>
-    <select id="countySel" class="qsel" aria-label="選擇縣市">
-      <option value="">請選擇縣市</option>
-    </select>
-    <select id="districtSel" class="qsel" aria-label="選擇鄉鎮市區" disabled>
-      <option value="">請先選縣市</option>
-    </select>
-  </div>
-  <div class="chips">
-    <button class="chip on" data-r="all">全部</button>
-    <button class="chip" data-r="north">北部</button>
-    <button class="chip" data-r="central">中部</button>
-    <button class="chip" data-r="south">南部</button>
-    <button class="chip" data-r="east">東部</button>
-    <button class="chip" data-r="island">離島</button>
+  <div class="tb-section">
+    <div class="tb-label">🗺️ 分區瀏覽</div>
+    <div class="chips">
+      <button class="chip on" data-r="all">全部</button>
+      <button class="chip" data-r="north">北部</button>
+      <button class="chip" data-r="central">中部</button>
+      <button class="chip" data-r="south">南部</button>
+      <button class="chip" data-r="east">東部</button>
+      <button class="chip" data-r="island">離島</button>
+    </div>
   </div>
 </div>
 
