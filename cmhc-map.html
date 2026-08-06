@@ -60,7 +60,8 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 .qsel{padding:8px 12px;border:1.5px solid var(--line);border-radius:16px;font-size:14px;font-family:inherit;background:#fdfaf5;color:var(--ink);cursor:pointer;outline:none;transition:border-color .15s;flex:1;min-width:120px}
 .qsel:focus{border-color:var(--sub)}
 .qsel:disabled{opacity:.45;cursor:not-allowed}
-.qsel-main{flex:1;min-width:140px}
+.dropdowns{display:flex;gap:8px;flex:1;min-width:160px}
+.dropdowns .qsel{flex:1;min-width:0}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{padding:6px 14px;border-radius:16px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-family:inherit;cursor:pointer;color:var(--sub);font-weight:500;transition:all .15s}
 .chip.on{color:#fff;border-color:transparent}
@@ -114,7 +115,7 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 .pin{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .pin-tip{background:var(--ink);color:var(--cream);border:none;border-radius:6px;padding:5px 10px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:500;box-shadow:0 2px 10px rgba(0,0,0,.2)}
 .pin-tip::before{border-top-color:var(--ink)!important}
-.pin-name-tip{background:rgba(255,255,255,.95);color:var(--ink);border:1.5px solid #c2185b;border-radius:6px;padding:3px 8px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:nowrap}
+.pin-name-tip{background:rgba(255,255,255,.95);color:var(--ink);border:2px solid #ccc;border-radius:6px;padding:3px 8px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:nowrap;cursor:pointer;pointer-events:auto!important}
 .pin-name-tip::before{display:none}
 @keyframes pinDrop{0%{transform:translateY(-28px);opacity:0}60%{transform:translateY(4px);opacity:1}80%{transform:translateY(-3px)}100%{transform:translateY(0)}}
 .pinwrap{animation:pinDrop .5s ease-out both;filter:drop-shadow(0 3px 5px rgba(0,0,0,.4))}
@@ -204,7 +205,7 @@ footer a{color:var(--ink)}
 </header>
 
 <div class="toolbar">
-  <!-- 第一列：定位 + 搜尋 + 縣市下拉 -->
+  <!-- 第一列：定位 + 搜尋 + 縣市下拉 + 鄉鎮下拉 -->
   <div class="filterbar">
     <button id="locateBtn" class="locate-icon-btn" type="button" title="找離我最近的中心" aria-label="找離我最近的中心">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/></svg>
@@ -214,16 +215,17 @@ footer a{color:var(--ink)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
       <span class="search-toggle-label">搜尋</span>
     </button>
-    <select id="countySel" class="qsel qsel-main" aria-label="選擇縣市">
-      <option value="">選擇縣市</option>
-    </select>
+    <div class="dropdowns">
+      <select id="countySel" class="qsel" aria-label="選擇縣市">
+        <option value="">選擇縣市</option>
+      </select>
+      <select id="districtSel" class="qsel" aria-label="選擇鄉鎮市區" disabled>
+        <option value="">選擇鄉鎮市區</option>
+      </select>
+    </div>
   </div>
-  <!-- 第二列：鄉鎮下拉 + 手動搜尋（選了縣市才出現） -->
+  <!-- 第二列：手動搜尋（按搜尋才出現） -->
   <div class="select-row" id="selectRow" hidden>
-    <select id="districtSel" class="qsel" aria-label="選擇鄉鎮市區" disabled>
-      <option value="">請先選縣市</option>
-    </select>
-    <!-- 手動輸入（展開搜尋後顯示） -->
     <div class="search" id="searchRow" hidden style="flex-basis:100%">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
       <input id="q" type="search" placeholder="輸入鄉鎮市區（例：石門、大武）" autocomplete="off">
@@ -572,6 +574,46 @@ function focusCounty(cName){
 function dropPins(arr){
   clearFocusPins();
   focusLayer = L.layerGroup();
+
+  // 手動覆寫方向：解決特定縣市據點標籤重疊問題
+  const DIR_OVERRIDE = {
+    // 臺北市：中正、信義、南港三點集中在中部偏右，分散各方向
+    10: 'bottom',   // 信義區 → 往下，避開南港和中正
+    11: 'right',    // 南港區 → 往右，東側空間充裕
+    12: 'left',     // 中正區 → 往左，避開信義和南港
+    // 新北市：新莊在中和正上方，各自往兩側展開
+    1:  'left',     // 中和區 → 往左
+    3:  'right',    // 新莊區 → 往右
+    // 高雄市：苓雅、鳳山、鹽埕集中在西南，分散避免混淆
+    30: 'right',    // 苓雅區 → 往右
+    31: 'left',     // 鳳山區 → 往左
+    35: 'left',     // 鹽埕區 → 往左
+    19: 'bottom',   // 東區 → 往下
+    20: 'left',     // 西屯區 → 往左
+    21: 'right',    // 潭子區 → 往右
+  };
+
+  function tooltipDir(d, arr){
+    if(DIR_OVERRIDE[d.id] !== undefined) return DIR_OVERRIDE[d.id];
+    if(arr.length === 1) return 'right';
+    let nearest = null, minDist = Infinity;
+    arr.forEach(other=>{
+      if(other.id === d.id) return;
+      const dist = Math.hypot(d.lat - other.lat, d.lng - other.lng);
+      if(dist < minDist){ minDist = dist; nearest = other; }
+    });
+    if(!nearest) return 'right';
+    // 把 tooltip 貼在遠離最近鄰居的那一側（左右判斷）
+    // 也考慮上下：若最近鄰居主要在上方則貼下，反之貼上
+    const dLng = d.lng - nearest.lng;
+    const dLat = d.lat - nearest.lat;
+    if(Math.abs(dLng) >= Math.abs(dLat)){
+      return dLng >= 0 ? 'right' : 'left';
+    } else {
+      return dLat >= 0 ? 'top' : 'bottom';
+    }
+  }
+
   arr.forEach((d,i)=>{
     const svg = `<div class="pinwrap" style="animation-delay:${i*0.09}s">
       <svg width="32" height="44" viewBox="0 0 30 42">
@@ -583,10 +625,26 @@ function dropPins(arr){
       icon:L.divIcon({html:svg,className:'',iconSize:[32,44],iconAnchor:[16,44]}),
       zIndexOffset:1000
     }).bindPopup(popupHtml(d),{maxWidth:300});
-    // 落點同時顯示中心名稱（不必點擊即可看到）
     const label = (()=>{ const s=d.name.replace(d.city,''); return (!s||s==='社區心理衛生中心')? d.name : s; })();
-    pm.bindTooltip(label, {permanent:true, direction:'right', offset:[6,-16], className:'pin-name-tip'});
-    pm.on('click',()=>highlightCard(d.id,true));
+    const dir = tooltipDir(d, arr);
+    const offset = {right:[6,-16], left:[-6,-16], top:[0,-44], bottom:[0,4]}[dir];
+    const col = cityColor(d.city, d.region);
+    pm.bindTooltip(label, {permanent:true, direction:dir, offset:offset, className:'pin-name-tip'});
+    pm.on('tooltipopen', ()=>{
+      const el = pm.getTooltip()?.getElement();
+      if(!el) return;
+      el.style.borderColor = col;
+      el._cmhcHandler = e=>{
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        pm.openPopup();
+        highlightCard(d.id, true);
+      };
+      el.removeEventListener('click', el._cmhcHandler);
+      el.addEventListener('click', el._cmhcHandler);
+    });
+    pm.on('click',()=>{ pm.openPopup(); highlightCard(d.id,true); });
     focusLayer.addLayer(pm);
   });
   focusLayer.addTo(map);
@@ -641,7 +699,7 @@ const searchToggle = document.getElementById('searchToggle');
 
 function resetQuickpick(){
   qCity=''; districtSel.disabled=true;
-  districtSel.innerHTML='<option value="">請先選縣市</option>';
+  districtSel.innerHTML='<option value="">選擇鄉鎮市區</option>';
 }
 
 /* 搜尋展開按鈕 */
@@ -691,14 +749,12 @@ countySel.addEventListener('change', ()=>{
   if(!city){
     qCity='';
     districtSel.disabled = true;
-    districtSel.innerHTML = '<option value="">請先選縣市</option>';
-    if(searchRow.hasAttribute('hidden')) selectRow.setAttribute('hidden','');
+    districtSel.innerHTML = '<option value="">選擇鄉鎮市區</option>';
     apply();
     clearFocusPins();
     flyHome(.7);
     return;
   }
-  selectRow.removeAttribute('hidden');
   qCity = city;
   districtSel.disabled = false;
   const allOpt = document.createElement('option');
