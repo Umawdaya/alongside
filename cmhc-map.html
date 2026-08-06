@@ -191,7 +191,9 @@ footer a{color:var(--ink)}
 #bottomSheet{position:fixed;left:0;right:0;bottom:0;z-index:2500;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);max-height:50vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);touch-action:none}
 #bottomSheet.show{transform:translateY(0)}
 #bottomSheet.dragging{transition:none}
-.sheet-handle-row{flex-shrink:0;display:flex;justify-content:center;padding:9px 0 3px;cursor:grab}
+.sheet-handle-row{flex-shrink:0;display:flex;justify-content:center;align-items:center;padding:14px 0 10px;cursor:grab;position:relative}
+.sheet-close-btn{position:absolute;right:14px;top:9px;width:32px;height:32px;border-radius:50%;border:none;background:var(--cream);color:var(--ink);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.sheet-close-btn:active{background:#e8ded0}
 .sheet-handle{width:38px;height:5px;border-radius:3px;background:#d8d0c2}
 .sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 20px 22px;font-family:'Noto Sans TC',sans-serif}
 .sheet-body .pp-name{font-weight:900;font-size:16.5px;border-bottom:2.5px solid;display:inline-block;padding-bottom:2px}
@@ -263,7 +265,10 @@ footer a{color:var(--ink)}
   <div id="map"></div>
   <div id="sheetScrim"></div>
   <div id="bottomSheet" role="dialog" aria-modal="true" aria-label="中心資訊">
-    <div class="sheet-handle-row" id="sheetHandleRow"><div class="sheet-handle"></div></div>
+    <div class="sheet-handle-row" id="sheetHandleRow">
+      <div class="sheet-handle"></div>
+      <button type="button" class="sheet-close-btn" id="sheetCloseBtn" aria-label="關閉">✕</button>
+    </div>
     <div class="sheet-body" id="sheetBody"></div>
   </div>
   <div class="panel">
@@ -892,6 +897,7 @@ const bottomSheet = document.getElementById('bottomSheet');
 const sheetScrim  = document.getElementById('sheetScrim');
 const sheetBody   = document.getElementById('sheetBody');
 const sheetHandleRow = document.getElementById('sheetHandleRow');
+const sheetCloseBtn = document.getElementById('sheetCloseBtn');
 let sheetOpenId = null;
 
 function sheetContentHtml(d){
@@ -926,6 +932,7 @@ function closeBottomSheet(){
   sheetOpenId = null;
 }
 sheetScrim.addEventListener('click', closeBottomSheet);
+sheetCloseBtn.addEventListener('click', closeBottomSheet);
 
 /* 統一入口：手機用 Bottom Sheet，桌面用 Leaflet Popup，內容與資料共用同一份 */
 function showDetail(d, marker){
@@ -940,6 +947,7 @@ function showDetail(d, marker){
 (function(){
   let startY=0, curY=0, dragging=false, startHeight=0;
   function onStart(e){
+    if(e.target.closest('#sheetCloseBtn')) return;   // ✕ 按鈕自己有 click 事件，避免跟拖曳手勢衝突
     dragging = true;
     startY = (e.touches? e.touches[0].clientY : e.clientY);
     startHeight = bottomSheet.getBoundingClientRect().height;
