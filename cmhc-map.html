@@ -184,6 +184,25 @@ footer a{color:var(--ink)}
 .viewtabs{display:none;position:sticky;top:0;z-index:1001;background:#fff;border-bottom:1px solid var(--line)}
 .viewtabs button{flex:1;padding:13px 8px;border:none;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;transition:color .15s,border-color .15s}
 .viewtabs button.on{color:var(--ink);border-bottom-color:#3a4a10}
+
+/* ── 手機版 Bottom Sheet ── */
+#sheetScrim{position:fixed;inset:0;background:rgba(45,42,38,.35);z-index:2400;opacity:0;pointer-events:none;transition:opacity .28s}
+#sheetScrim.show{opacity:1;pointer-events:auto}
+#bottomSheet{position:fixed;left:0;right:0;bottom:0;z-index:2500;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);max-height:50vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);touch-action:none}
+#bottomSheet.show{transform:translateY(0)}
+#bottomSheet.dragging{transition:none}
+.sheet-handle-row{flex-shrink:0;display:flex;justify-content:center;padding:9px 0 3px;cursor:grab}
+.sheet-handle{width:38px;height:5px;border-radius:3px;background:#d8d0c2}
+.sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 20px 22px;font-family:'Noto Sans TC',sans-serif}
+.sheet-body .pp-name{font-weight:900;font-size:16.5px;border-bottom:2.5px solid;display:inline-block;padding-bottom:2px}
+.sheet-body .pp-row{font-size:13px;color:var(--sub);margin-top:8px;line-height:1.65;display:flex;gap:6px}
+.sheet-body .pp-row .k{flex-shrink:0;background:var(--cream);border-radius:4px;padding:0 5px;height:21px;line-height:21px;font-size:11.5px;color:var(--ink)}
+.sheet-body .pp-links{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+.sheet-body .pp-links .btn{font-size:13.5px;padding:9px 16px;border-radius:22px;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;gap:5px}
+.sheet-body img{width:100%;border-radius:10px;margin-bottom:10px;display:block}
+@media (max-width:860px){
+  .leaflet-popup{display:none!important}
+}
 </style>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
@@ -242,6 +261,11 @@ footer a{color:var(--ink)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
   </button>
   <div id="map"></div>
+  <div id="sheetScrim"></div>
+  <div id="bottomSheet" role="dialog" aria-modal="true" aria-label="中心資訊">
+    <div class="sheet-handle-row" id="sheetHandleRow"><div class="sheet-handle"></div></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
   <div class="panel">
     <div id="list"></div>
     <div class="empty" id="empty">沒有符合的中心，換個關鍵字試試——<br>可以輸入你服務的鄉鎮市區名稱。</div>
@@ -500,7 +524,7 @@ DATA.forEach(d=>{
   const shortName = (()=>{ const s=d.name.replace(d.city,''); return (!s||s==='社區心理衛生中心')? d.name : s; })();
   m.bindTooltip(shortName, {direction:'top', offset:[0,-10], className:'pin-tip', sticky:false});
   m.bindPopup(popupHtml(d),{maxWidth:300});
-  m.on('click',()=>highlightCard(d.id,true));
+  m.on('click',()=>{ highlightCard(d.id,true); if(isMobile()) openBottomSheet(d); });
   markers[d.id]=m;
 });
 
@@ -537,7 +561,7 @@ function buildList(items){
       card.addEventListener('click',()=>{
         setMobileView('map');   // 手機：點清單卡片自動切到地圖，看得到聚焦動畫
         map.flyTo([d.lat,d.lng],13,{duration:.8});
-        setTimeout(()=>{ markers[d.id].openPopup(); },850);
+        setTimeout(()=>{ if(isMobile()) openBottomSheet(d); else markers[d.id].openPopup(); },850);
         highlightCard(d.id,false);
       });
       body.appendChild(card);
@@ -638,13 +662,13 @@ function dropPins(arr){
         e.stopPropagation();
         e.stopImmediatePropagation();
         e.preventDefault();
-        pm.openPopup();
+        if(isMobile()) openBottomSheet(d); else pm.openPopup();
         highlightCard(d.id, true);
       };
       el.removeEventListener('click', el._cmhcHandler);
       el.addEventListener('click', el._cmhcHandler);
     });
-    pm.on('click',()=>{ pm.openPopup(); highlightCard(d.id,true); });
+    pm.on('click',()=>{ if(isMobile()) openBottomSheet(d); else pm.openPopup(); highlightCard(d.id,true); });
     focusLayer.addLayer(pm);
   });
   focusLayer.addTo(map);
@@ -655,6 +679,7 @@ function clearFocusPins(){
   if(focusLayer){ map.removeLayer(focusLayer); focusLayer = null; }
 }
 map.on('click', clearFocusPins);
+map.on('click', ()=>{ if(isMobile()) closeBottomSheet(); });
 
 function highlightCard(id,scroll){
   document.querySelectorAll('.card.hl').forEach(e=>e.classList.remove('hl'));
@@ -814,7 +839,7 @@ locateBtn.addEventListener('click', ()=>{
       setMobileView('map');   // 手機：切到地圖，讓使用者看到最近中心的位置與資訊
       map.flyTo([nearest.lat,nearest.lng],14,{duration:1});
       setTimeout(()=>{
-        markers[nearest.id].openPopup();
+        if(isMobile()) openBottomSheet(nearest); else markers[nearest.id].openPopup();
         highlightCard(nearest.id,true);
       },1050);
     },
@@ -861,6 +886,96 @@ function setMobileView(view){   // 'map' 或 'list'
 }
 tabMap.addEventListener('click', ()=>setMobileView('map'));
 tabList.addEventListener('click', ()=>setMobileView('list'));
+
+/* ───────── 手機版 Bottom Sheet ───────── */
+const bottomSheet = document.getElementById('bottomSheet');
+const sheetScrim  = document.getElementById('sheetScrim');
+const sheetBody   = document.getElementById('sheetBody');
+const sheetHandleRow = document.getElementById('sheetHandleRow');
+let sheetOpenId = null;
+
+function sheetContentHtml(d){
+  const c = cityColor(d.city, d.region);
+  const links = `<div class="pp-links">${actionLinksHtml(d)}</div>`;
+  const photo = PHOTOS[d.id] ? `<img src="${PHOTOS[d.id]}" alt="${d.name}">` : '';
+  const shortName = (()=>{ const s=d.name.replace(d.city,''); return (!s||s==='社區心理衛生中心')? d.name : s; })();
+  return `${photo}<span class="pp-name" style="border-color:${c}">${shortName}</span>
+    <div class="pp-row"><span class="k">服務區域</span><span>${d.area||'—'}</span></div>
+    <div class="pp-row"><span class="k">地址</span><span>${d.addr}${d.addrNote?`（${d.addrNote}）`:''}</span></div>
+    ${d.hours?`<div class="pp-row"><span class="k">時間</span><span>${d.hours}</span></div>`:''}
+    <div class="pp-row"><span class="k">${d.hours?'諮詢專線':'電話'}</span><span>${d.tel}</span></div>
+    ${d.fax?`<div class="pp-row"><span class="k">傳真</span><span>${d.fax}</span></div>`:''}
+    ${d.email?`<div class="pp-row"><span class="k">Email</span><span><a href="mailto:${d.email}" style="color:#3d5a86">${d.email}</a></span></div>`:''}
+    ${d.transport?`<div class="pp-row" style="align-items:flex-start;"><span class="k">交通</span><span style="font-size:12px;line-height:1.6;">${d.transport}</span></div>`:''}
+    ${links}`;
+}
+
+function openBottomSheet(d){
+  sheetOpenId = d.id;
+  sheetBody.innerHTML = sheetContentHtml(d);
+  sheetBody.scrollTop = 0;
+  bottomSheet.classList.add('show');
+  sheetScrim.classList.add('show');
+  // 地圖區留出 Sheet 高度的視覺空間，讓 marker 能從 Sheet 後面露出來
+  map.setPadding ? null : null;
+  try{ map.invalidateSize(); }catch(e){}
+}
+function closeBottomSheet(){
+  bottomSheet.classList.remove('show');
+  sheetScrim.classList.remove('show');
+  sheetOpenId = null;
+}
+sheetScrim.addEventListener('click', closeBottomSheet);
+
+/* 統一入口：手機用 Bottom Sheet，桌面用 Leaflet Popup，內容與資料共用同一份 */
+function showDetail(d, marker){
+  if(isMobile()){
+    openBottomSheet(d);
+  } else if(marker){
+    marker.openPopup();
+  }
+}
+
+/* 下滑手勢關閉（觸控） */
+(function(){
+  let startY=0, curY=0, dragging=false, startHeight=0;
+  function onStart(e){
+    dragging = true;
+    startY = (e.touches? e.touches[0].clientY : e.clientY);
+    startHeight = bottomSheet.getBoundingClientRect().height;
+    bottomSheet.classList.add('dragging');
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('touchend', onEnd);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+  }
+  function onMove(e){
+    if(!dragging) return;
+    curY = (e.touches? e.touches[0].clientY : e.clientY);
+    const dy = Math.max(0, curY - startY);
+    if(dy>0 && e.cancelable) e.preventDefault();
+    bottomSheet.style.transform = `translateY(${dy}px)`;
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging = false;
+    bottomSheet.classList.remove('dragging');
+    const dy = Math.max(0, curY - startY);
+    bottomSheet.style.transform = '';
+    if(dy > startHeight*0.28 || dy > 110){
+      closeBottomSheet();
+    }
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onEnd);
+  }
+  sheetHandleRow.addEventListener('touchstart', onStart, {passive:true});
+  sheetHandleRow.addEventListener('mousedown', onStart);
+})();
+
+// 螢幕從手機切到桌面（旋轉/縮放視窗）時，若 Sheet 開著就關掉，避免殘留
+window.addEventListener('resize', ()=>{ if(!isMobile() && sheetOpenId!==null) closeBottomSheet(); });
 
 /* ───────── PWA：離線支援與安裝 ───────── */
 // 註冊 Service Worker
