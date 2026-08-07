@@ -180,6 +180,21 @@ footer a{color:var(--ink)}
   .main.show-list .panel{display:block}
   .panel-toggle{display:none}
 }
+/* ── 手機版：地圖顯示前的啟動卡片 ── */
+#mapGate{display:none}
+@media (max-width:860px){
+  #mapGate{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:34px 20px 38px;text-align:center}
+  #mapGate .gate-icon{font-size:34px}
+  #mapGate .gate-title{font-size:15.5px;font-weight:700;color:var(--ink)}
+  #mapGate .gate-sub{font-size:12.5px;color:var(--sub);line-height:1.6;max-width:280px}
+  #mapGate button{margin-top:6px;background:#3a4a10;color:#f7ede2;border:none;border-radius:24px;padding:12px 26px;font-size:14.5px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 3px 12px rgba(58,74,16,.3)}
+  #mapGate button:active{background:#4a5a20}
+  .viewtabs,.main{display:none}
+  body.map-ready .viewtabs{display:flex}
+  body.map-ready .main{display:flex}
+  body.map-ready #mapGate{display:none}
+}
+
 /* 手機分頁切換列（僅小螢幕顯示，桌面隱藏） */
 .viewtabs{display:none;position:sticky;top:0;z-index:1001;background:#fff;border-bottom:1px solid var(--line)}
 .viewtabs button{flex:1;padding:13px 8px;border:none;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;transition:color .15s,border-color .15s}
@@ -252,6 +267,13 @@ footer a{color:var(--ink)}
       <input id="q" type="search" placeholder="輸入鄉鎮市區（例：石門、大武）" autocomplete="off">
     </div>
   </div>
+</div>
+
+<div id="mapGate">
+  <div class="gate-icon">🗺️</div>
+  <div class="gate-title">地圖需要較大的顯示空間</div>
+  <div class="gate-sub">請先透過上方欄位選擇縣市或搜尋，也可以直接按下方按鈕開啟地圖瀏覽全部據點</div>
+  <button type="button" id="mapGateBtn">顯示地圖</button>
 </div>
 
 <div class="viewtabs" role="tablist" aria-label="檢視模式切換">
@@ -750,6 +772,7 @@ searchToggle.addEventListener('click',()=>{
 });
 
 document.getElementById('q').addEventListener('input',e=>{
+  activateMap();
   q=e.target.value; countySel.value=''; resetQuickpick(); apply();
 });
 
@@ -772,6 +795,7 @@ function openCountyInList(city){
 }
 
 countySel.addEventListener('change', ()=>{
+  activateMap();
   const city = countySel.value;
   region='all';
   document.getElementById('q').value=''; q='';
@@ -800,6 +824,7 @@ countySel.addEventListener('change', ()=>{
 });
 
 districtSel.addEventListener('change', ()=>{
+  activateMap();
   const dist = districtSel.value;
   q = dist; document.getElementById('q').value='';
   apply();
@@ -816,6 +841,7 @@ function haversineKm(lat1,lng1,lat2,lng2){
 }
 const locateBtn = document.getElementById('locateBtn');
 locateBtn.addEventListener('click', ()=>{
+  activateMap();
   if(!navigator.geolocation){
     alert('您的瀏覽器不支援定位功能，請直接使用上方搜尋或選單查詢。');
     return;
@@ -875,6 +901,19 @@ panelToggle.addEventListener('click', ()=>{
     }
   }, 320);
 });
+
+/* ───────── 手機版：地圖顯示閘門 ───────── */
+const mapGateBtn = document.getElementById('mapGateBtn');
+let mapActivated = false;
+function activateMap(){
+  if(mapActivated || !isMobile()) return;
+  mapActivated = true;
+  document.body.classList.add('map-ready');
+  setTimeout(()=>{ map.invalidateSize(); }, 60);
+}
+mapGateBtn.addEventListener('click', activateMap);
+// 縮放視窗跨過手機/桌面門檻時，桌面永遠視為已啟用（不受閘門限制）
+window.addEventListener('resize', ()=>{ if(!isMobile()) document.body.classList.add('map-ready'); });
 
 /* ───────── 手機分頁：地圖／清單切換 ───────── */
 const tabMap  = document.getElementById('tabMap');
