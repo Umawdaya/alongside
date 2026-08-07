@@ -180,23 +180,34 @@ footer a{color:var(--ink)}
   .main.show-list .panel{display:block}
   .panel-toggle{display:none}
 }
-/* ── 手機版：地圖顯示前的啟動卡片 ── */
-#mapGate{display:none}
+/* ── 手機版：首頁四入口卡片 ── */
+#homeEntry{display:none}
 @media (max-width:860px){
-  #mapGate{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:34px 20px 38px;text-align:center}
-  #mapGate .gate-icon{font-size:34px}
-  #mapGate .gate-title{font-size:15.5px;font-weight:700;color:var(--ink)}
-  #mapGate .gate-sub{font-size:12.5px;color:var(--sub);line-height:1.6;max-width:280px}
-  #mapGate button{margin-top:6px;background:#3a4a10;color:#f7ede2;border:none;border-radius:24px;padding:12px 26px;font-size:14.5px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 3px 12px rgba(58,74,16,.3)}
-  #mapGate button:active{background:#4a5a20}
+  .toolbar{display:none}
+  .back-entry-btn{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:11px 16px;font-size:12.5px;color:var(--sub);font-family:inherit;cursor:pointer}
+  #homeEntry{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:6px 16px 30px}
+  #homeEntry .entry-card{grid-column:span 1;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(61,50,41,.06)}
+  #homeEntry .entry-card:active{background:var(--cream)}
+  #homeEntry .entry-icon{font-size:26px}
+  #homeEntry .entry-title{font-size:14px;font-weight:700;color:var(--ink)}
+  #homeEntry .entry-sub{font-size:11px;color:var(--sub);line-height:1.5}
+  #homeEntry .entry-card.loading .entry-icon{animation:spin 1s linear infinite}
+  body.entry-picked #homeEntry{display:none}
+  body.entry-picked .toolbar{display:block}
   .viewtabs,.main{display:none}
   body.map-ready .viewtabs{display:flex}
   body.map-ready .main{display:flex}
-  body.map-ready #mapGate{display:none}
+  /* 選縣市／搜尋走「僅清單」模式：不進地圖，但地圖 DOM 仍在背景初始化好，供之後「查看地圖」使用 */
+  body.list-only .main{display:flex}
+  body.list-only .main #map{display:none}
+  body.list-only .main .panel{display:block}
+  body.list-only .viewtabs{display:flex}
 }
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* 手機分頁切換列（僅小螢幕顯示，桌面隱藏） */
 .viewtabs{display:none;position:sticky;top:0;z-index:1001;background:#fff;border-bottom:1px solid var(--line)}
+.back-entry-btn{display:none}
 .viewtabs button{flex:1;padding:13px 8px;border:none;background:transparent;font-family:inherit;font-size:15px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;transition:color .15s,border-color .15s}
 .viewtabs button.on{color:var(--ink);border-bottom-color:#3a4a10}
 
@@ -241,6 +252,8 @@ footer a{color:var(--ink)}
 </header>
 
 <div class="toolbar">
+  <!-- 手機版：返回首頁入口 -->
+  <button id="backToEntry" class="back-entry-btn" type="button">← 換個方式尋找</button>
   <!-- 第一列：定位 + 搜尋 + 縣市下拉 + 鄉鎮下拉 -->
   <div class="filterbar">
     <button id="locateBtn" class="locate-icon-btn" type="button" title="找離我最近的中心" aria-label="找離我最近的中心">
@@ -269,11 +282,27 @@ footer a{color:var(--ink)}
   </div>
 </div>
 
-<div id="mapGate">
-  <div class="gate-icon">🗺️</div>
-  <div class="gate-title">地圖需要較大的顯示空間</div>
-  <div class="gate-sub">請先透過上方欄位選擇縣市或搜尋，也可以直接按下方按鈕開啟地圖瀏覽全部據點</div>
-  <button type="button" id="mapGateBtn">顯示地圖</button>
+<div id="homeEntry">
+  <button type="button" class="entry-card" id="entryLocate">
+    <div class="entry-icon">📍</div>
+    <div class="entry-title">離我最近</div>
+    <div class="entry-sub">依定位判斷服務區域</div>
+  </button>
+  <button type="button" class="entry-card" id="entryCounty">
+    <div class="entry-icon">🏠</div>
+    <div class="entry-title">選擇縣市／鄉鎮</div>
+    <div class="entry-sub">從清單選擇</div>
+  </button>
+  <button type="button" class="entry-card" id="entrySearch">
+    <div class="entry-icon">🔍</div>
+    <div class="entry-title">搜尋地名</div>
+    <div class="entry-sub">輸入鄉鎮市區</div>
+  </button>
+  <button type="button" class="entry-card" id="entryMap">
+    <div class="entry-icon">🗺️</div>
+    <div class="entry-title">瀏覽全臺地圖</div>
+    <div class="entry-sub">點擊地圖或查看完整清單</div>
+  </button>
 </div>
 
 <div class="viewtabs" role="tablist" aria-label="檢視模式切換">
@@ -772,7 +801,7 @@ searchToggle.addEventListener('click',()=>{
 });
 
 document.getElementById('q').addEventListener('input',e=>{
-  activateMap();
+  ensureMapReady();
   q=e.target.value; countySel.value=''; resetQuickpick(); apply();
 });
 
@@ -795,7 +824,7 @@ function openCountyInList(city){
 }
 
 countySel.addEventListener('change', ()=>{
-  activateMap();
+  ensureMapReady();
   const city = countySel.value;
   region='all';
   document.getElementById('q').value=''; q='';
@@ -824,7 +853,7 @@ countySel.addEventListener('change', ()=>{
 });
 
 districtSel.addEventListener('change', ()=>{
-  activateMap();
+  ensureMapReady();
   const dist = districtSel.value;
   q = dist; document.getElementById('q').value='';
   apply();
@@ -841,7 +870,7 @@ function haversineKm(lat1,lng1,lat2,lng2){
 }
 const locateBtn = document.getElementById('locateBtn');
 locateBtn.addEventListener('click', ()=>{
-  activateMap();
+  ensureMapReady();
   if(!navigator.geolocation){
     alert('您的瀏覽器不支援定位功能，請直接使用上方搜尋或選單查詢。');
     return;
@@ -902,16 +931,52 @@ panelToggle.addEventListener('click', ()=>{
   }, 320);
 });
 
-/* ───────── 手機版：地圖顯示閘門 ───────── */
-const mapGateBtn = document.getElementById('mapGateBtn');
+/* ───────── 手機版：首頁四入口 ───────── */
+const homeEntry   = document.getElementById('homeEntry');
+const backToEntry = document.getElementById('backToEntry');
 let mapActivated = false;
-function activateMap(){
+
+function ensureMapReady(){
   if(mapActivated || !isMobile()) return;
   mapActivated = true;
   document.body.classList.add('map-ready');
   setTimeout(()=>{ map.invalidateSize(); }, 60);
 }
-mapGateBtn.addEventListener('click', activateMap);
+// 進入「僅清單」模式：地圖 DOM 仍初始化好備用，畫面只顯示清單
+function enterListOnly(){
+  ensureMapReady();
+  document.body.classList.add('entry-picked','list-only');
+  setMobileView('list');
+}
+// 進入「地圖＋清單雙分頁」模式，預設停在地圖分頁
+function enterMapBrowse(){
+  ensureMapReady();
+  document.body.classList.remove('list-only');
+  document.body.classList.add('entry-picked');
+  setMobileView('map');
+}
+function backHome(){
+  document.body.classList.remove('entry-picked','list-only');
+}
+backToEntry.addEventListener('click', backHome);
+
+document.getElementById('entryLocate').addEventListener('click', ()=>{
+  document.body.classList.add('entry-picked');   // 定位走 Bottom Sheet，不需要清單/地圖畫面，但仍需離開首頁卡片
+  ensureMapReady();
+  locateBtn.click();
+});
+document.getElementById('entryCounty').addEventListener('click', ()=>{
+  enterListOnly();
+  countySel.focus();
+  if(countySel.showPicker) { try{ countySel.showPicker(); }catch(e){} }
+});
+document.getElementById('entrySearch').addEventListener('click', ()=>{
+  enterListOnly();
+  searchToggle.click();
+  document.getElementById('q').focus();
+});
+document.getElementById('entryMap').addEventListener('click', enterMapBrowse);
+
 // 縮放視窗跨過手機/桌面門檻時，桌面永遠視為已啟用（不受閘門限制）
 window.addEventListener('resize', ()=>{ if(!isMobile()) document.body.classList.add('map-ready'); });
 
@@ -928,7 +993,7 @@ function setMobileView(view){   // 'map' 或 'list'
   tabMap.setAttribute('aria-selected', showList?'false':'true');
   if(!showList) map.invalidateSize();   // 地圖重新顯示時修正尺寸，避免圖磚破圖
 }
-tabMap.addEventListener('click', ()=>setMobileView('map'));
+tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only'); setMobileView('map'); });
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
 /* ───────── 手機版 Bottom Sheet ───────── */
