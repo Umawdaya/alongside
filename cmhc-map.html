@@ -153,10 +153,21 @@ h1 .cnt{font-size:14px;font-weight:500;color:var(--sub);margin-left:10px;letter-
 /* ── 頁尾 ── */
 footer{background:var(--cream);padding:14px 28px;font-size:12px;color:var(--sub);line-height:1.8;border-top:1px solid var(--line)}
 footer a{color:var(--ink)}
+.fnote-summary{display:none}
 .fnote{margin-bottom:0}
 .fnote b{color:var(--ink);font-weight:500}
 .sharenote{background:var(--ink);color:var(--cream);text-align:center;font-size:12.5px;letter-spacing:.5px;padding:11px 20px;line-height:1.7}
-@media(max-width:720px){footer{padding:13px 18px}.sharenote{font-size:11.5px;padding:10px 16px}}
+@media(max-width:720px){
+  footer{padding:0}
+  .sharenote{font-size:11.5px;padding:10px 16px}
+  .fnote-collapse{padding:13px 18px}
+  .fnote-summary{display:block;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;list-style:none;padding:2px 0;display:flex;align-items:center;gap:6px}
+  .fnote-summary::-webkit-details-marker{display:none}
+  .fnote-summary::before{content:'▸';font-size:11px;color:var(--sub);transition:transform .15s}
+  .fnote-collapse[open] .fnote-summary::before{transform:rotate(90deg)}
+  .fnote-collapse .fnote{margin-top:10px}
+  .fnote-collapse .fnote b{display:none}
+}
 
 @media (max-width:860px){
   .main{flex-direction:column;height:auto}
@@ -180,7 +191,15 @@ footer a{color:var(--ink)}
   .main.show-list .panel{display:block}
   .panel-toggle{display:none}
 }
-/* ── 手機版：首頁四入口卡片 ── */
+/* ── 手機版：地圖載入中骨架屏 ── */
+#mapLoading{display:none}
+@media (max-width:860px){
+  body.map-loading #mapLoading{display:flex}
+  #mapLoading{position:absolute;inset:0;z-index:800;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,#ece6da 25%,#f4efe4 37%,#ece6da 63%);background-size:400% 100%;animation:skeleton-shimmer 1.4s ease infinite}
+  #mapLoading .spinner{width:34px;height:34px;border:3px solid #d8cfbc;border-top-color:#3a4a10;border-radius:50%;animation:spin .8s linear infinite}
+  #mapLoading .loading-text{font-size:12.5px;color:var(--sub);font-weight:600}
+}
+@keyframes skeleton-shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
 #homeEntry{display:none}
 @media (max-width:860px){
   .toolbar{display:none}
@@ -220,6 +239,8 @@ footer a{color:var(--ink)}
 .sheet-handle-row{flex-shrink:0;display:flex;justify-content:center;align-items:center;padding:14px 0 10px;cursor:grab;position:relative}
 .sheet-close-btn{position:absolute;right:14px;top:9px;width:32px;height:32px;border-radius:50%;border:none;background:var(--cream);color:var(--ink);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .sheet-close-btn:active{background:#e8ded0}
+.sheet-back-btn{display:none;position:absolute;left:14px;top:9px;border:none;background:none;color:var(--sub);font-size:12.5px;font-family:inherit;cursor:pointer;padding:6px 4px}
+body.sheet-from-locate .sheet-back-btn{display:block}
 .sheet-handle{width:38px;height:5px;border-radius:3px;background:#d8d0c2}
 .sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 20px 22px;font-family:'Noto Sans TC',sans-serif}
 .sheet-body .pp-name{font-weight:900;font-size:16.5px;border-bottom:2.5px solid;display:inline-block;padding-bottom:2px}
@@ -314,10 +335,15 @@ footer a{color:var(--ink)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
   </button>
   <div id="map"></div>
+  <div id="mapLoading">
+    <div class="spinner"></div>
+    <div class="loading-text">地圖載入中…</div>
+  </div>
   <div id="sheetScrim"></div>
   <div id="bottomSheet" role="dialog" aria-modal="true" aria-label="中心資訊">
     <div class="sheet-handle-row" id="sheetHandleRow">
       <div class="sheet-handle"></div>
+      <button type="button" class="sheet-back-btn" id="sheetBackBtn">← 回首頁</button>
       <button type="button" class="sheet-close-btn" id="sheetCloseBtn" aria-label="關閉">✕</button>
     </div>
     <div class="sheet-body" id="sheetBody"></div>
@@ -329,12 +355,15 @@ footer a{color:var(--ink)}
 </div>
 
 <footer>
-  <div class="fnote">
-    <b>地圖編製說明</b>：此地圖為臉書粉專「入人兜鬥揣路—社區入家工作者專業促進聯盟」，根據衛福部公布之全國社區心理衛生中心通訊錄（1150622更新版），使用 AI 製作而成。AI 製作之社區心衛中心之資訊，均再經人工核對各縣市社區心衛中心網頁，若資訊有誤以及更新，也請大家不吝私訊小編更正。
-  </div>
-  <div class="fnote" style="margin-top:8px;">
-    地點座標為近似位置，前往前請以電話確認。
-  </div>
+  <details class="fnote-collapse" id="fnoteDetails">
+    <summary class="fnote-summary">地圖編製說明</summary>
+    <div class="fnote">
+      <b>地圖編製說明</b>：此地圖為臉書粉專「入人兜鬥揣路—社區入家工作者專業促進聯盟」，根據衛福部公布之全國社區心理衛生中心通訊錄（1150622更新版），使用 AI 製作而成。AI 製作之社區心衛中心之資訊，均再經人工核對各縣市社區心衛中心網頁，若資訊有誤以及更新，也請大家不吝私訊小編更正。
+    </div>
+    <div class="fnote" style="margin-top:8px;">
+      地點座標為近似位置，前往前請以電話確認。
+    </div>
+  </details>
 </footer>
 
 <div class="sharenote">
@@ -407,10 +436,14 @@ const TILES = [
   { url:'https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}',
     opt:{ attribution:'&copy; <a href="https://maps.nlsc.gov.tw/">內政部國土測繪中心</a> 臺灣通用電子地圖', maxZoom:18 } },
 ];
-let tileIdx = 0, tileErr = 0, base;
+let tileIdx = 0, tileErr = 0, base, tilesEverLoaded = false;
 function mountTiles(){
   const t = TILES[tileIdx];
   base = L.tileLayer(t.url, t.opt).addTo(map);
+  base.on('load', ()=>{
+    tilesEverLoaded = true;
+    document.body.classList.remove('map-loading');
+  });
   base.on('tileerror', ()=>{
     if(++tileErr >= 6 && tileIdx < TILES.length-1){
       map.removeLayer(base); tileIdx++; tileErr = 0; mountTiles();
@@ -899,7 +932,7 @@ locateBtn.addEventListener('click', ()=>{
       setMobileView('map');   // 手機：切到地圖，讓使用者看到最近中心的位置與資訊
       map.flyTo([nearest.lat,nearest.lng],14,{duration:1});
       setTimeout(()=>{
-        if(isMobile()) openBottomSheet(nearest); else markers[nearest.id].openPopup();
+        if(isMobile()) openBottomSheet(nearest, true); else markers[nearest.id].openPopup();
         highlightCard(nearest.id,true);
       },1050);
     },
@@ -940,7 +973,10 @@ function ensureMapReady(){
   if(mapActivated || !isMobile()) return;
   mapActivated = true;
   document.body.classList.add('map-ready');
+  if(!tilesEverLoaded) document.body.classList.add('map-loading');
   setTimeout(()=>{ map.invalidateSize(); }, 60);
+  // 保險機制：若圖磚事件因故沒觸發（例如快取瞬間完成），最多 4 秒後強制關閉載入畫面
+  setTimeout(()=>{ document.body.classList.remove('map-loading'); }, 4000);
 }
 // 進入「僅清單」模式：地圖 DOM 仍初始化好備用，畫面只顯示清單
 function enterListOnly(){
@@ -956,12 +992,13 @@ function enterMapBrowse(){
   setMobileView('map');
 }
 function backHome(){
-  document.body.classList.remove('entry-picked','list-only');
+  document.body.classList.remove('entry-picked','list-only','sheet-from-locate');
+  closeBottomSheet();
 }
 backToEntry.addEventListener('click', backHome);
 
 document.getElementById('entryLocate').addEventListener('click', ()=>{
-  document.body.classList.add('entry-picked');   // 定位走 Bottom Sheet，不需要清單/地圖畫面，但仍需離開首頁卡片
+  document.body.classList.add('entry-picked','sheet-from-locate');   // 定位走 Bottom Sheet，不需要清單/地圖畫面，但仍需離開首頁卡片
   ensureMapReady();
   locateBtn.click();
 });
@@ -1002,6 +1039,7 @@ const sheetScrim  = document.getElementById('sheetScrim');
 const sheetBody   = document.getElementById('sheetBody');
 const sheetHandleRow = document.getElementById('sheetHandleRow');
 const sheetCloseBtn = document.getElementById('sheetCloseBtn');
+const sheetBackBtn = document.getElementById('sheetBackBtn');
 let sheetOpenId = null;
 
 function sheetContentHtml(d){
@@ -1020,12 +1058,13 @@ function sheetContentHtml(d){
     ${links}`;
 }
 
-function openBottomSheet(d){
+function openBottomSheet(d, fromLocate){
   sheetOpenId = d.id;
   sheetBody.innerHTML = sheetContentHtml(d);
   sheetBody.scrollTop = 0;
   bottomSheet.classList.add('show');
   sheetScrim.classList.add('show');
+  document.body.classList.toggle('sheet-from-locate', !!fromLocate);
   // 地圖區留出 Sheet 高度的視覺空間，讓 marker 能從 Sheet 後面露出來
   map.setPadding ? null : null;
   try{ map.invalidateSize(); }catch(e){}
@@ -1037,6 +1076,7 @@ function closeBottomSheet(){
 }
 sheetScrim.addEventListener('click', closeBottomSheet);
 sheetCloseBtn.addEventListener('click', closeBottomSheet);
+sheetBackBtn.addEventListener('click', backHome);
 
 /* 統一入口：手機用 Bottom Sheet，桌面用 Leaflet Popup，內容與資料共用同一份 */
 function showDetail(d, marker){
