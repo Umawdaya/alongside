@@ -409,20 +409,31 @@ const PHOTOS = { 58: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAg
 const COUNTY_LINKS = {"新北市": {"web": "https://www.health.ntpc.gov.tw/basic/?node=19497", "fb": "https://www.facebook.com/ntpchealth", "fbLabel": "衛生局粉專"}, "臺北市": {"web": "https://mental-health.gov.taipei/", "fb": "https://www.facebook.com/taipeimentalhealth"}, "桃園市": {"web": "https://mental.tycg.gov.tw/", "fb": "https://www.facebook.com/profile.php?id=61574193644250"}, "臺中市": {"web": "https://www.health.taichung.gov.tw/2981208/Nodelist", "fb": null}, "臺南市": {"web": "https://health.tainan.gov.tw/page.asp?mainid={6048F242-90E2-4CC2-9DAB-45D4CCB2ACAD}", "fb": "https://www.facebook.com/TainanLoveLife"}, "高雄市": {"web": "https://health.kcg.gov.tw/Content_List.aspx?n=34C5CDCD129BEA06", "fb": "https://www.facebook.com/MHC7134000"}, "宜蘭縣": {"web": "https://www.ilshb.gov.tw/News.aspx?n=15713&sms=15523", "fb": "https://www.facebook.com/ilshb", "fbLabel": "衛生局粉專"}, "新竹縣": {"web": "https://www.hcshb.gov.tw/News_Content.aspx?n=690&s=91980", "fb": "https://www.facebook.com/CommunityMentalHealthCenter"}, "苗栗縣": {"web": "https://www.mlshb.gov.tw/nc/content-list?tag=187&idNavigations=46", "fb": "https://www.facebook.com/mal.nodrug", "fbLabel": "心理健康中心粉專"}, "彰化縣": {"web": "https://center.chshb.gov.tw/aboutus.asp#2", "fb": null}, "南投縣": {"web": "https://reurl.cc/Z15LoQ", "fb": "https://www.facebook.com/profile.php?id=100064683703392"}, "雲林縣": {"web": "https://ylshb.yunlin.gov.tw/cp.aspx?n=15617", "fb": null}, "嘉義縣": {"web": "https://cyshb.cyhg.gov.tw/cmhc", "fb": "https://www.facebook.com/cyshbcmhc"}, "屏東縣": {"web": "https://reurl.cc/OEadp9", "fb": null}, "臺東縣": {"web": "https://www.ttshb.gov.tw/Tmhc", "fb": "https://www.facebook.com/profile.php?id=100078207022860"}, "花蓮縣": {"web": "http://dapc.hlshb.gov.tw/mentalHealth/", "fb": "https://www.facebook.com/profile.php?id=100063696260152"}, "基隆市": {"web": "https://www.klchb.klcg.gov.tw/tw/klchb/1370.html", "fb": null}, "新竹市": {"web": "https://shc.hccg.gov.tw", "fb": null}, "嘉義市": {"web": "https://mental.chiayi.gov.tw", "fb": "https://www.facebook.com/warmheartpig"}, "澎湖縣": {"web": "https://www.phchb.gov.tw/home.jsp?id=142", "fb": "https://www.facebook.com/profile.php?id=100064046132849"}, "金門縣": {"web": "https://phb.kinmen.gov.tw/Content_List.aspx?n=1E8085DB69373A96", "fb": null}, "連江縣": {"web": "https://www.matsuhb.gov.tw/Chhtml/content/684?webaid=2", "fb": null}};
 const CITY_ORDER = ['臺北市','新北市','基隆市','桃園市','新竹市','新竹縣','宜蘭縣','苗栗縣','臺中市','彰化縣','南投縣','雲林縣','嘉義市','嘉義縣','臺南市','高雄市','屏東縣','花蓮縣','臺東縣','澎湖縣','金門縣','連江縣'];
 
-// 地圖可視與拖曳範圍：西界收至剛好容納金門（118.15），北界容納連江（26.35），
-// 避免露出過多中國沿岸；東、南界含蘭嶼、綠島與周邊海域
-const TW_BOUNDS = L.latLngBounds([21.75, 118.15], [26.35, 122.10]);
+// 地圖可視與拖曳範圍：西界容納金門／小金門（118.10，留緩衝；小金門最西點精確座標未查得公開數據，採保守值），
+// 北界容納馬祖東引「國境之北」北固礁（實測 26°23'22"N ≈ 26.389，設 26.42 留緩衝）；
+// 東、南界含蘭嶼、綠島與周邊海域；不含東沙、太平島（南海，距離過遠，已與 Umaw 確認不涵蓋）
+const TW_BOUNDS = L.latLngBounds([21.75, 118.10], [26.42, 122.10]);
 // 手機初始畫面：用中心點＋縮放等級，讓台灣本島填滿窄長螢幕，不帶入中國沿海
 const TW_MOBILE_CENTER = [23.85, 121.35];  // 中心偏東北，讓臺北、宜蘭、花東完整入鏡
 const TW_MOBILE_ZOOM = 7.5;
 const isMobile = ()=>window.matchMedia('(max-width:860px)').matches;
 const map = L.map('map',{
   scrollWheelZoom:true,
-  minZoom:6,
   zoomSnap:0.1,          // 允許 7.3 這類非整數縮放等級
   maxBounds: TW_BOUNDS,
   maxBoundsViscosity: 1.0
 });
+// 動態縮放下限：讓使用者最多只能縮到「剛好完整顯示台灣本島＋離島」就不能再縮出去，
+// 避免看到中國沿岸或大片海洋；手機版另外跟已調校好的 TW_MOBILE_ZOOM 取最小值，避免蓋掉原本窄螢幕構圖
+function updateMinZoom(){
+  const fitZoom = map.getBoundsZoom(TW_BOUNDS, false, L.point(20,20));
+  map.setMinZoom(isMobile() ? Math.min(TW_MOBILE_ZOOM, fitZoom) : fitZoom);
+}
+updateMinZoom();
+// 用 Leaflet 自己的 'resize' 事件（在 invalidateSize 完成、容器新尺寸生效後才觸發），
+// 不用 window resize：桌機／手機版切點（860px）改變容器大小時，window resize 會比 Leaflet
+// 內部的 requestAnimFrame 更早觸發，這時 map.getSize() 抓到的還是舊尺寸，算出來的下限會不同步
+map.on('resize', updateMinZoom);
 function flyHome(dur){
   if(isMobile()){ map.flyTo(TW_MOBILE_CENTER, TW_MOBILE_ZOOM, {duration:dur||.7}); }
   else { map.flyToBounds(TW_BOUNDS, {padding:[20,20], duration:dur||.7}); }
