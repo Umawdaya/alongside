@@ -199,7 +199,6 @@ footer a{color:var(--ink)}
 }
 @keyframes skeleton-shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
 #homeEntry{display:none}
-#regionEntry{display:none}
 @media (max-width:860px){
   .toolbar{display:none}
   .back-entry-btn{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:11px 16px;font-size:12.5px;color:var(--sub);font-family:inherit;cursor:pointer}
@@ -212,16 +211,6 @@ footer a{color:var(--ink)}
   #homeEntry .entry-card.loading .entry-icon{animation:spin 1s linear infinite}
   body.entry-picked #homeEntry{display:none}
   body.entry-picked .toolbar{display:block}
-  #regionEntry{padding:6px 16px 30px}
-  #regionEntry .region-back-btn{display:block;width:100%;text-align:left;background:none;border:none;padding:2px 4px 14px;font-size:12.5px;color:var(--sub);font-family:inherit;cursor:pointer}
-  #regionEntry .region-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  #regionEntry .entry-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(61,50,41,.06)}
-  #regionEntry .entry-card:active{background:var(--cream)}
-  #regionEntry .entry-icon{font-size:26px}
-  #regionEntry .entry-title{font-size:14px;font-weight:700;color:var(--ink)}
-  #regionEntry .entry-sub{font-size:11px;color:var(--sub);line-height:1.5}
-  body.region-picked #homeEntry{display:none}
-  body.region-picked #regionEntry{display:block}
   .viewtabs,.main{display:none}
   body.map-ready .viewtabs{display:flex}
   body.map-ready .main{display:flex}
@@ -350,35 +339,9 @@ footer a{color:var(--ink)}
   </button>
   <button type="button" class="entry-card" id="entryMap">
     <div class="entry-icon">🗺️</div>
-    <div class="entry-title">瀏覽全國地圖</div>
-    <div class="entry-sub">台灣全島／澎湖／金門／馬祖</div>
+    <div class="entry-title">瀏覽全國社區心衛地圖</div>
+    <div class="entry-sub">含澎湖、金門、馬祖</div>
   </button>
-</div>
-
-<div id="regionEntry">
-  <button type="button" class="region-back-btn" id="regionBackBtn">← 返回</button>
-  <div class="region-cards">
-    <button type="button" class="entry-card" id="regionMain">
-      <div class="entry-icon">🇹🇼</div>
-      <div class="entry-title">台灣全島</div>
-      <div class="entry-sub">含蘭嶼、綠島</div>
-    </button>
-    <button type="button" class="entry-card" id="regionPenghu">
-      <div class="entry-icon">🏝️</div>
-      <div class="entry-title">澎湖</div>
-      <div class="entry-sub">查看據點</div>
-    </button>
-    <button type="button" class="entry-card" id="regionKinmen">
-      <div class="entry-icon">🏝️</div>
-      <div class="entry-title">金門</div>
-      <div class="entry-sub">查看據點</div>
-    </button>
-    <button type="button" class="entry-card" id="regionMatsu">
-      <div class="entry-icon">🏝️</div>
-      <div class="entry-title">馬祖</div>
-      <div class="entry-sub">查看據點</div>
-    </button>
-  </div>
 </div>
 
 <div class="viewtabs" role="tablist" aria-label="檢視模式切換">
@@ -432,7 +395,7 @@ footer a{color:var(--ink)}
 </div>
 
 <!-- 版本戳記：用來確認線上跑的是哪一版，滑到頁面最底即可看到 -->
-<div class="buildstamp" id="buildStamp">版本 2026.08.10-2130</div>
+<div class="buildstamp" id="buildStamp">版本 2026.08.10-2240</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -1240,12 +1203,7 @@ document.getElementById('entrySearch').addEventListener('click', ()=>{
   searchToggle.click();
   document.getElementById('q').focus();
 });
-document.getElementById('entryMap').addEventListener('click', ()=>{ document.body.classList.add('region-picked'); });
-document.getElementById('regionBackBtn').addEventListener('click', ()=>{ document.body.classList.remove('region-picked'); });
-document.getElementById('regionMain').addEventListener('click', ()=>{ document.body.classList.remove('region-picked'); enterMapBrowse(); });
-document.getElementById('regionPenghu').addEventListener('click', ()=>openOutlyingModal('澎湖縣'));
-document.getElementById('regionKinmen').addEventListener('click', ()=>openOutlyingModal('金門縣'));
-document.getElementById('regionMatsu').addEventListener('click', ()=>openOutlyingModal('連江縣'));
+document.getElementById('entryMap').addEventListener('click', enterMapBrowse);   // 直接進全國地圖（含金門、馬祖）
 
 // 縮放視窗跨過手機/桌面門檻時，桌面永遠視為已啟用（不受閘門限制）
 window.addEventListener('resize', ()=>{ if(!isMobile()) document.body.classList.add('map-ready'); });
@@ -1267,7 +1225,7 @@ tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
 // 版本戳記：開發者主控台可看到，用來確認線上跑的是哪一版
-console.log('[做伙行 心衛地圖] 版本 2026.08.10-2130');
+console.log('[做伙行 心衛地圖] 版本 2026.08.10-2240');
 
 /* ───────── 手機版 Bottom Sheet ───────── */
 const bottomSheet = document.getElementById('bottomSheet');
@@ -1328,15 +1286,6 @@ sheetBackBtn.addEventListener('click', ()=>{
     flyHome(.7);  // 搜尋／點圖釘流程：清 pin + 飛回全圖
   }
 });
-
-/* 統一入口：手機用 Bottom Sheet，桌面用 Leaflet Popup，內容與資料共用同一份 */
-function showDetail(d, marker){
-  if(isMobile()){
-    openBottomSheet(d);
-  } else if(marker){
-    marker.openPopup();
-  }
-}
 
 /* 下滑手勢關閉（觸控） */
 (function(){
