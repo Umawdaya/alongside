@@ -1303,6 +1303,11 @@ function closeBottomSheet(){
   bottomSheet.classList.remove('show');
   sheetScrim.classList.remove('show');
   sheetOpenId = null;
+  // 非「找最近」情境：關閉後自動清 pin 並飛回全台灣視野
+  if(!document.body.classList.contains('sheet-from-locate')){
+    clearFocusPins();
+    flyHome(.7);
+  }
 }
 sheetScrim.addEventListener('click', closeBottomSheet);
 sheetCloseBtn.addEventListener('click', closeBottomSheet);
