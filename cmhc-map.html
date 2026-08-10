@@ -150,6 +150,7 @@ h1{font-size:24px;font-weight:900;margin-top:0;letter-spacing:1px}
 
 /* ── 頁尾 ── */
 footer{background:var(--cream);padding:14px 28px;font-size:12px;color:var(--sub);line-height:1.8;border-top:1px solid var(--line)}
+.buildstamp{text-align:center;font-size:10.5px;color:#b4a894;padding:6px 0 14px;letter-spacing:.5px;font-family:'Noto Sans TC',sans-serif}
 footer a{color:var(--ink)}
 .fnote-summary{display:none}
 .fnote{margin-bottom:0}
@@ -429,6 +430,9 @@ footer a{color:var(--ink)}
 <div class="sharenote">
   《做伙行》・社區入家工作者專業促進聯盟　歡迎自由分享，使用時請註明出處
 </div>
+
+<!-- 版本戳記：用來確認線上跑的是哪一版，滑到頁面最底即可看到 -->
+<div class="buildstamp" id="buildStamp">版本 2026.08.10-2130</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -1262,6 +1266,9 @@ function setMobileView(view){   // 'map' 或 'list'
 tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only'); setMobileView('map'); });
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
+// 版本戳記：開發者主控台可看到，用來確認線上跑的是哪一版
+console.log('[做伙行 心衛地圖] 版本 2026.08.10-2130');
+
 /* ───────── 手機版 Bottom Sheet ───────── */
 const bottomSheet = document.getElementById('bottomSheet');
 const sheetScrim  = document.getElementById('sheetScrim');
@@ -1303,10 +1310,11 @@ function closeBottomSheet(){
   bottomSheet.classList.remove('show');
   sheetScrim.classList.remove('show');
   sheetOpenId = null;
-  // 非「找最近」情境：關閉後自動清 pin 並飛回全台灣視野
+  // 非「找最近」情境：關閉後自動清 pin 並飛回全台灣視野。
+  // 延遲 120ms 是為了讓卡片的收合過渡動畫先跑完，避免跟 flyTo 的動畫互搶而被中斷。
   if(!document.body.classList.contains('sheet-from-locate')){
     clearFocusPins();
-    flyHome(.7);
+    setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} flyHome(.7); }, 120);
   }
 }
 sheetScrim.addEventListener('click', closeBottomSheet);
