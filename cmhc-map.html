@@ -235,14 +235,14 @@ footer a{color:var(--ink)}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── 外島（澎湖／金門／馬祖）：固定顯示在地圖角落的小圖示，取代原本的按鈕 ── */
-.outly-corner-ctl{display:flex;flex-direction:column;gap:6px;margin:0 0 8px 8px!important}
-.outly-corner-tile{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px 12px 3px 3px;cursor:pointer;box-shadow:0 2px 6px rgba(45,42,38,.18);font-family:inherit;font-size:11.5px;font-weight:700;color:var(--ink);line-height:1}
+/* ── 外島（金門／馬祖）：固定顯示在地圖左上角的小圖示，取代原本的按鈕 ── */
+.outly-corner-ctl{display:flex;flex-direction:column;gap:8px;margin:8px 0 0 8px!important}
+.outly-corner-tile{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:26px;padding:5px 18px 5px 5px;cursor:pointer;box-shadow:0 2px 8px rgba(45,42,38,.2);font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);line-height:1}
 .outly-corner-tile:hover{background:var(--cream)}
-.outly-corner-tile svg{width:24px;height:24px;flex-shrink:0}
+.outly-corner-tile svg{width:34px;height:34px;flex-shrink:0}
 @media(max-width:860px){
-  .outly-corner-tile{font-size:10.5px;padding:2px 10px 2px 2px}
-  .outly-corner-tile svg{width:20px;height:20px}
+  .outly-corner-tile{font-size:12.5px;padding:4px 14px 4px 4px}
+  .outly-corner-tile svg{width:28px;height:28px}
 }
 #outlyScrim{display:none;position:fixed;inset:0;background:rgba(45,42,38,.45);z-index:3100}
 #outlyScrim.show{display:block}
@@ -473,15 +473,24 @@ const PHOTOS = { 58: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAg
 const COUNTY_LINKS = {"新北市": {"web": "https://www.health.ntpc.gov.tw/basic/?node=19497", "fb": "https://www.facebook.com/ntpchealth", "fbLabel": "衛生局粉專"}, "臺北市": {"web": "https://mental-health.gov.taipei/", "fb": "https://www.facebook.com/taipeimentalhealth"}, "桃園市": {"web": "https://mental.tycg.gov.tw/", "fb": "https://www.facebook.com/profile.php?id=61574193644250"}, "臺中市": {"web": "https://www.health.taichung.gov.tw/2981208/Nodelist", "fb": null}, "臺南市": {"web": "https://health.tainan.gov.tw/page.asp?mainid={6048F242-90E2-4CC2-9DAB-45D4CCB2ACAD}", "fb": "https://www.facebook.com/TainanLoveLife"}, "高雄市": {"web": "https://health.kcg.gov.tw/Content_List.aspx?n=34C5CDCD129BEA06", "fb": "https://www.facebook.com/MHC7134000"}, "宜蘭縣": {"web": "https://www.ilshb.gov.tw/News.aspx?n=15713&sms=15523", "fb": "https://www.facebook.com/ilshb", "fbLabel": "衛生局粉專"}, "新竹縣": {"web": "https://www.hcshb.gov.tw/News_Content.aspx?n=690&s=91980", "fb": "https://www.facebook.com/CommunityMentalHealthCenter"}, "苗栗縣": {"web": "https://www.mlshb.gov.tw/nc/content-list?tag=187&idNavigations=46", "fb": "https://www.facebook.com/mal.nodrug", "fbLabel": "心理健康中心粉專"}, "彰化縣": {"web": "https://center.chshb.gov.tw/aboutus.asp#2", "fb": null}, "南投縣": {"web": "https://reurl.cc/Z15LoQ", "fb": "https://www.facebook.com/profile.php?id=100064683703392"}, "雲林縣": {"web": "https://ylshb.yunlin.gov.tw/cp.aspx?n=15617", "fb": null}, "嘉義縣": {"web": "https://cyshb.cyhg.gov.tw/cmhc", "fb": "https://www.facebook.com/cyshbcmhc"}, "屏東縣": {"web": "https://reurl.cc/OEadp9", "fb": null}, "臺東縣": {"web": "https://www.ttshb.gov.tw/Tmhc", "fb": "https://www.facebook.com/profile.php?id=100078207022860"}, "花蓮縣": {"web": "http://dapc.hlshb.gov.tw/mentalHealth/", "fb": "https://www.facebook.com/profile.php?id=100063696260152"}, "基隆市": {"web": "https://www.klchb.klcg.gov.tw/tw/klchb/1370.html", "fb": null}, "新竹市": {"web": "https://shc.hccg.gov.tw", "fb": null}, "嘉義市": {"web": "https://mental.chiayi.gov.tw", "fb": "https://www.facebook.com/warmheartpig"}, "澎湖縣": {"web": "https://www.phchb.gov.tw/home.jsp?id=142", "fb": "https://www.facebook.com/profile.php?id=100064046132849"}, "金門縣": {"web": "https://phb.kinmen.gov.tw/Content_List.aspx?n=1E8085DB69373A96", "fb": null}, "連江縣": {"web": "https://www.matsuhb.gov.tw/Chhtml/content/684?webaid=2", "fb": null}};
 const CITY_ORDER = ['臺北市','新北市','基隆市','桃園市','新竹市','新竹縣','宜蘭縣','苗栗縣','臺中市','彰化縣','南投縣','雲林縣','嘉義市','嘉義縣','臺南市','高雄市','屏東縣','花蓮縣','臺東縣','澎湖縣','金門縣','連江縣'];
 
-// 外島（澎湖、金門、馬祖）改用獨立小視窗顯示（見下方「外島小視窗」區塊），不列入主地圖範圍
-const OUTLYING_COUNTIES = ['澎湖縣','金門縣','連江縣'];
+// 外島（金門、馬祖）改用獨立小視窗顯示（見下方「外島小視窗」區塊），不列入主地圖範圍。
+// 澎湖離台灣本島近，改成併入主地圖（見下方 PENGHU_BOUNDS／ensureBoundsForCity），不做獨立小圖示。
+const OUTLYING_COUNTIES = ['金門縣','連江縣'];
 const OUTLY_LABEL = {'澎湖縣':'澎湖','金門縣':'金門','連江縣':'馬祖'};
 const isOutlyingCity = city => OUTLYING_COUNTIES.includes(city);
 
 // 地圖可視與拖曳範圍：只框台灣本島＋蘭嶼、綠島。西界 119.95（外傘頂洲一帶，本島最西點，仍持續漂移，留緩衝），
 // 北界 25.40（富貴角，本島最北點實測 25.298°N，留緩衝），東界 122.05（三貂角，本島最東點實測 122.00°E，留緩衝），
-// 南界 21.80（鵝鑾鼻，本島最南點實測 21.90°N，留緩衝）；澎湖、金門、馬祖已移出主地圖範圍，主地圖完全不會帶到中國沿岸
+// 南界 21.80（鵝鑾鼻，本島最南點實測 21.90°N，留緩衝）；金門、馬祖已移出主地圖範圍，主地圖完全不會帶到中國沿岸
 const TW_BOUNDS = L.latLngBounds([21.80, 119.95], [25.40, 122.05]);
+// 澎湖（約 23.56°N, 119.66°E）在 TW_BOUNDS 西界之外。若直接把 TW_BOUNDS 西界拉寬到含澎湖，
+// 北邊界（25.40，富貴角需要）會連帶蓋到中國平潭島（緯度 25.27°-25.73°N、經度 119.53°-120.17°E，
+// 離台灣最近的中國領土）——單一矩形框不住「有澎湖、沒平潭」。
+// 解法：平常維持 TW_BOUNDS，只有使用者要去澎湖時才暫時把可拖曳範圍換成這個澎湖專用小範圍
+// （北界 23.95°，遠低於平潭緯度，不會露出中國），離開澎湖再換回 TW_BOUNDS。
+const PENGHU_BOUNDS = L.latLngBounds([23.05, 119.15], [23.95, 119.85]);
+let currentMapBounds = TW_BOUNDS;
+let boundsMode = 'main';   // 'main' | 'penghu'
 // 手機初始畫面：用中心點＋縮放等級，讓台灣本島填滿窄長螢幕，不帶入中國沿海
 const TW_MOBILE_CENTER = [23.85, 121.35];  // 中心偏東北，讓臺北、宜蘭、花東完整入鏡
 const TW_MOBILE_ZOOM = 7.5;
@@ -493,11 +502,11 @@ const map = L.map('map',{
   maxBoundsViscosity: 1.0
 });
 // 動態縮放下限：用 getBoundsZoom(bounds, true)「cover」算法，而不是預設的「contain」，
-// 差別在於：contain 會讓 TW_BOUNDS 完整塞進畫面、較窄的那個維度留白，寬螢幕桌面版留白處就會露出中國沿岸；
-// cover 改成讓畫面完全被 TW_BOUNDS 填滿（較長維度可能需要拖曳才看得到頭尾），保證畫面不會超出台灣本島＋離島範圍。
+// 差別在於：contain 會讓 bounds 完整塞進畫面、較窄的那個維度留白，寬螢幕桌面版留白處就會露出範圍外的區域；
+// cover 改成讓畫面完全被 bounds 填滿（較長維度可能需要拖曳才看得到頭尾），保證畫面不會超出目前的可視範圍。
 // 手機版窄長螢幕跟已調校好的 TW_MOBILE_ZOOM 取最小值，避免蓋掉原本構圖。
 function updateMinZoom(){
-  const fitZoom = map.getBoundsZoom(TW_BOUNDS, true);
+  const fitZoom = map.getBoundsZoom(currentMapBounds, true);
   map.setMinZoom(isMobile() ? Math.min(TW_MOBILE_ZOOM, fitZoom) : fitZoom);
 }
 updateMinZoom();
@@ -505,7 +514,17 @@ updateMinZoom();
 // 不用 window resize：桌機／手機版切點（860px）改變容器大小時，window resize 會比 Leaflet
 // 內部的 requestAnimFrame 更早觸發，這時 map.getSize() 抓到的還是舊尺寸，算出來的下限會不同步
 map.on('resize', updateMinZoom);
+// 依目的地縣市切換可拖曳範圍：去澎湖時暫時換成 PENGHU_BOUNDS，其他情況（含 city=null，即回首頁）換回 TW_BOUNDS
+function ensureBoundsForCity(city){
+  const wantMode = (city === '澎湖縣') ? 'penghu' : 'main';
+  if(boundsMode === wantMode) return;
+  boundsMode = wantMode;
+  currentMapBounds = (wantMode === 'penghu') ? PENGHU_BOUNDS : TW_BOUNDS;
+  map.setMaxBounds(currentMapBounds);
+  updateMinZoom();
+}
 function flyHome(dur){
+  ensureBoundsForCity(null);
   if(isMobile()){ map.flyTo(TW_MOBILE_CENTER, TW_MOBILE_ZOOM, {duration:dur||.7}); }
   else { map.flyToBounds(TW_BOUNDS, {padding:[20,20], duration:dur||.7}); }
 }
@@ -736,6 +755,7 @@ function buildList(items){
           return;
         }
         setMobileView('map');   // 手機：點清單卡片自動切到地圖，看得到聚焦動畫
+        ensureBoundsForCity(d.city);
         map.flyTo([d.lat,d.lng],13,{duration:.8});
         setTimeout(()=>{ if(isMobile()) openBottomSheet(d); else markers[d.id].openPopup(); },850);
         highlightCard(d.id,false);
@@ -762,6 +782,7 @@ function focusCounty(cName){
   const arr = (window._items||DATA).filter(d=>d.city===cName);
   if(!arr.length) return;
   if(isOutlyingCity(cName)) return;   // 外島不在主地圖範圍內，改由外島小視窗處理
+  ensureBoundsForCity(cName);
   if(arr.length===1){
     map.flyTo([arr[0].lat,arr[0].lng],12,{duration:.8});
   }else{
@@ -890,6 +911,8 @@ function apply(){
   if(kw && items.length){
     document.querySelectorAll('.county').forEach(c=>c.classList.add('open'));
     if(mapItems.length && mapItems.length<=12){
+      // 搜尋結果如果全部落在澎湖，暫時切換成澎湖範圍才飛得過去；其他情況維持本島範圍
+      ensureBoundsForCity(mapItems.every(d=>d.city==='澎湖縣') ? '澎湖縣' : null);
       dropPins(mapItems);
       const g = L.featureGroup(mapItems.map(d=>markers[d.id]));
       map.flyToBounds(g.getBounds().pad(.4),{maxZoom:12,duration:.8});
@@ -1026,6 +1049,7 @@ locateBtn.addEventListener('click', ()=>{
         return;
       }
       setMobileView('map');   // 手機：切到地圖，讓使用者看到最近中心的位置與資訊
+      ensureBoundsForCity(nearest.city);
       map.flyTo([nearest.lat,nearest.lng],14,{duration:1});
       setTimeout(()=>{
         if(isMobile()) openBottomSheet(nearest, true); else markers[nearest.id].openPopup();
@@ -1066,7 +1090,6 @@ const outlyModal  = document.getElementById('outlyModal');
 const outlyVisual = document.getElementById('outlyVisual');
 const outlyBody   = document.getElementById('outlyBody');
 const outlyCloseBtn = document.getElementById('outlyCloseBtn');
-let penghuMap = null;   // 澎湖用真實底圖的小地圖（離中國夠遠，沒有露出疑慮），延遲到第一次開啟才建立
 
 // 金門、馬祖離中國沿岸太近，真實底圖不管怎麼縮都可能帶到對岸一小段海岸線，
 // 改用向量色塊示意圖（純色塊＋一個據點圖釘，不接任何底圖圖磚），確保畫面上不會出現中國陸地。
@@ -1095,16 +1118,6 @@ function outlyShapeSvg(city){
       <circle cx="565" cy="85" r="7" fill="#fff" stroke="${col}" stroke-width="3.5"/>
     </svg>`;
   }
-  if(city==='澎湖縣'){
-    // 澎湖群島：主島群（馬公一帶，含跨海大橋連結的鄰近小島）＋周邊幾個較大離島；同樣取自同一份維基地圖，簡化過點數（用於角落小圖示，詳細資訊點開後另有真實地圖）
-    return `<svg viewBox="390 942 97 206" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="澎湖示意圖">
-      <polygon fill="${col}" points="448,978 442,981 439,980 434,988 427,990 426,1012 410,1013 422,1007 422,1004 418,1002 423,1001 424,995 421,993 428,982 426,981 434,986 439,976 448,972 457,977 457,983 453,986 457,987 455,990 458,993 458,999 464,998 462,1007 466,1000 468,1004 471,996 474,1004 477,999 485,1016 469,1014 456,1025 456,1032 445,1032 445,1028 440,1027 435,1018 437,1016 439,1025 445,1024 445,1028 448,1024 453,1025 455,1018 442,1018 442,1015 445,1016 447,1013 439,1013 443,1009 441,1005 448,1002 449,1009 453,1011 458,997 453,994 455,991 450,992 452,988 448,978"/>
-      <polygon fill="${col}" points="456,946 457,944 462,949 457,950 455,955 452,951 456,947"/>
-      <polygon fill="${col}" points="419,1077 418,1072 421,1074 423,1073 424,1081 427,1081 424,1084 425,1088 417,1086 419,1083 419,1078"/>
-      <polygon fill="${col}" points="395,1140 392,1136 404,1134 403,1141 398,1143 399,1146 395,1143 395,1140"/>
-      <circle cx="448" cy="1000" r="7" fill="#fff" stroke="${col}" stroke-width="3.5"/>
-    </svg>`;
-  }
   return '';
 }
 
@@ -1114,25 +1127,7 @@ function openOutlyingModal(city){
   outlyBody.innerHTML = `<div class="outly-title">${OUTLY_LABEL[city]||city}</div>` + popupHtml(d);
   outlyScrim.classList.add('show');
   outlyModal.classList.add('show');
-  if(city==='澎湖縣'){
-    outlyVisual.innerHTML = `<div class="outly-map" id="outlyPenghuMap"></div><div class="outly-caption">澎湖群島（可縮放拖曳）</div>`;
-    setTimeout(()=>{
-      if(!penghuMap){
-        penghuMap = L.map('outlyPenghuMap',{ scrollWheelZoom:false, zoomSnap:.1,
-          maxBounds:L.latLngBounds([23.05,119.15],[23.95,119.85]), maxBoundsViscosity:1.0 });
-        // 跟主地圖用同一個目前有效的底圖來源，保持一致；加 errorTileUrl 讓單一圖磚請求失敗時顯示透明空白，
-        // 不會出現圖磚伺服器回傳的異常色塊（這個小地圖沒有像主地圖 mountTiles() 那樣做換源重試）
-        L.tileLayer(TILES[tileIdx].url, Object.assign({}, TILES[tileIdx].opt, {
-          errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
-        })).addTo(penghuMap);
-        L.marker([d.lat,d.lng],{icon:L.divIcon({html:`<div class="pin" style="background:${cityColor(city,'island')}"></div>`,className:'',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(penghuMap);
-      }
-      penghuMap.setView([d.lat,d.lng],11);
-      penghuMap.invalidateSize();
-    },30);
-  } else {
-    outlyVisual.innerHTML = outlyShapeSvg(city) + `<div class="outly-caption">示意圖，非實際比例</div>`;
-  }
+  outlyVisual.innerHTML = outlyShapeSvg(city) + `<div class="outly-caption">示意圖，非實際比例</div>`;
 }
 function closeOutlyModal(){
   outlyScrim.classList.remove('show');
@@ -1141,14 +1136,15 @@ function closeOutlyModal(){
 outlyScrim.addEventListener('click', closeOutlyModal);
 outlyCloseBtn.addEventListener('click', closeOutlyModal);
 
-// 外島固定顯示在地圖左下角（Leaflet 自訂控制項），不用先點按鈕才看得到——
-// 三個小方塊本身就是 outlyShapeSvg() 產生的示意圖示，跟開啟後彈窗裡的圖一致，點下去才叫 openOutlyingModal 顯示詳細資訊
+// 金門、馬祖固定顯示在地圖左上角（Leaflet 自訂控制項），對應兩地實際地理位置在本島西北方；
+// 不用先點按鈕才看得到——兩個小方塊本身就是 outlyShapeSvg() 產生的示意圖示，跟開啟後彈窗裡的圖一致，點下去才叫 openOutlyingModal 顯示詳細資訊。
+// 澎湖離本島近，已併入主地圖（見 ensureBoundsForCity），不放在這裡。
 const OutlyCornerControl = L.Control.extend({
-  options: { position: 'bottomleft' },
+  options: { position: 'topleft' },
   onAdd: function(){
     const div = L.DomUtil.create('div', 'outly-corner-ctl');
     L.DomEvent.disableClickPropagation(div);
-    [['澎湖縣','澎湖'], ['金門縣','金門'], ['連江縣','馬祖']].forEach(([city, label])=>{
+    [['金門縣','金門'], ['連江縣','馬祖']].forEach(([city, label])=>{
       const tile = L.DomUtil.create('button', 'outly-corner-tile', div);
       tile.type = 'button';
       tile.setAttribute('aria-label', label + '（獨立顯示，不在主地圖比例內）');
