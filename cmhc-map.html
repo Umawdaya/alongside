@@ -269,8 +269,7 @@ footer a{color:var(--ink)}
 .sheet-handle-row{flex-shrink:0;display:flex;justify-content:center;align-items:center;padding:14px 0 10px;cursor:grab;position:relative}
 .sheet-close-btn{position:absolute;right:14px;top:9px;width:32px;height:32px;border-radius:50%;border:none;background:var(--cream);color:var(--ink);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .sheet-close-btn:active{background:#e8ded0}
-.sheet-back-btn{display:none;position:absolute;left:14px;top:9px;border:none;background:none;color:var(--sub);font-size:12.5px;font-family:inherit;cursor:pointer;padding:6px 4px}
-body.sheet-from-locate .sheet-back-btn{display:block}
+.sheet-back-btn{display:block;position:absolute;left:14px;top:9px;border:none;background:none;color:var(--sub);font-size:12.5px;font-family:inherit;cursor:pointer;padding:6px 4px;line-height:1}
 .sheet-handle{width:38px;height:5px;border-radius:3px;background:#d8d0c2}
 .sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 20px 22px;font-family:'Noto Sans TC',sans-serif}
 .sheet-body .pp-name{font-weight:900;font-size:16.5px;border-bottom:2.5px solid;display:inline-block;padding-bottom:2px}
@@ -1295,8 +1294,9 @@ function openBottomSheet(d, fromLocate){
   bottomSheet.classList.add('show');
   sheetScrim.classList.add('show');
   document.body.classList.toggle('sheet-from-locate', !!fromLocate);
-  // 地圖區留出 Sheet 高度的視覺空間，讓 marker 能從 Sheet 後面露出來
-  map.setPadding ? null : null;
+  // 返回按鈕文字與行為依來源切換
+  sheetBackBtn.textContent = fromLocate ? '← 回首頁' : '← 所有中心';
+  sheetBackBtn.dataset.backMode = fromLocate ? 'home' : 'map';
   try{ map.invalidateSize(); }catch(e){}
 }
 function closeBottomSheet(){
@@ -1306,7 +1306,15 @@ function closeBottomSheet(){
 }
 sheetScrim.addEventListener('click', closeBottomSheet);
 sheetCloseBtn.addEventListener('click', closeBottomSheet);
-sheetBackBtn.addEventListener('click', backHome);
+sheetBackBtn.addEventListener('click', ()=>{
+  if(sheetBackBtn.dataset.backMode === 'home'){
+    backHome();   // 「找最近」流程：回首頁選單
+  } else {
+    closeBottomSheet();
+    clearFocusPins();
+    flyHome(.7);  // 搜尋／點圖釘流程：清 pin + 飛回全圖
+  }
+});
 
 /* 統一入口：手機用 Bottom Sheet，桌面用 Leaflet Popup，內容與資料共用同一份 */
 function showDetail(d, marker){
