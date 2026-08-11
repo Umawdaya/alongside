@@ -240,7 +240,7 @@ footer a{color:var(--ink)}
 .outly-handle-row{display:none}
 .outly-back-btn{display:none}
 @media(max-width:860px){
-  #outlyModal{left:0;right:0;bottom:0;top:auto;transform:translateY(105%);width:100%;max-height:60vh;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);transition:transform .3s cubic-bezier(.32,.72,0,1);overflow-y:auto}
+  #outlyModal{left:0;right:0;bottom:0;top:auto;transform:translateY(105%);width:100%;max-height:min(42vh,340px);border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);transition:transform .3s cubic-bezier(.32,.72,0,1);overflow-y:auto}
   #outlyModal.show{transform:translateY(0)}
   .outly-handle-row{display:flex;justify-content:center;align-items:center;padding:14px 0 6px;position:relative}
   .outly-handle{width:38px;height:5px;border-radius:3px;background:#d8d0c2}
@@ -263,7 +263,7 @@ footer a{color:var(--ink)}
 /* ── 手機版 Bottom Sheet ── */
 #sheetScrim{position:fixed;inset:0;background:rgba(45,42,38,.35);z-index:2400;opacity:0;pointer-events:none;transition:opacity .28s}
 #sheetScrim.show{opacity:1;pointer-events:auto}
-#bottomSheet{position:fixed;left:0;right:0;bottom:0;z-index:2500;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);max-height:44vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);touch-action:none}
+#bottomSheet{position:fixed;left:0;right:0;bottom:0;z-index:2500;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);max-height:min(38vh,320px);display:flex;flex-direction:column;transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);touch-action:none}
 #bottomSheet.show{transform:translateY(0)}
 #bottomSheet.dragging{transition:none}
 .sheet-handle-row{flex-shrink:0;display:flex;justify-content:center;align-items:center;padding:14px 0 10px;cursor:grab;position:relative}
@@ -409,7 +409,7 @@ footer a{color:var(--ink)}
 </div>
 
 <!-- 版本戳記：用來確認線上跑的是哪一版，滑到頁面最底即可看到 -->
-<div class="buildstamp" id="buildStamp">版本 v.3.081111.26</div>
+<div class="buildstamp" id="buildStamp">版本 v.3.081112.10</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -763,7 +763,7 @@ function buildList(items){
         }
         setMobileView('map');   // 手機：點清單卡片自動切到地圖，看得到聚焦動畫
         map.flyTo([d.lat,d.lng],13,{duration:.8});
-        setTimeout(()=>{ if(isMobile()) openBottomSheet(d); else markers[d.id].openPopup(); },850);
+        setTimeout(()=>{ if(isMobile()) openBottomSheet(d, false, true); else markers[d.id].openPopup(); },850);
         highlightCard(d.id,false);
       });
       body.appendChild(card);
@@ -1292,7 +1292,7 @@ tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
 // 版本戳記：開發者主控台可看到，用來確認線上跑的是哪一版
-console.log('[做伙行 心衛地圖] 版本 v.3.081111.26');
+console.log('[做伙行 心衛地圖] 版本 v.3.081112.10');
 
 /* ───────── 手機版 Bottom Sheet ───────── */
 const bottomSheet = document.getElementById('bottomSheet');
@@ -1302,6 +1302,7 @@ const sheetHandleRow = document.getElementById('sheetHandleRow');
 const sheetCloseBtn = document.getElementById('sheetCloseBtn');
 const sheetBackBtn = document.getElementById('sheetBackBtn');
 let sheetOpenId = null;
+let _sheetFromList = false;   // 從清單點進來的旗標
 
 function sheetContentHtml(d){
   const c = cityColor(d.city, d.region);
@@ -1319,27 +1320,42 @@ function sheetContentHtml(d){
     ${links}`;
 }
 
-function openBottomSheet(d, fromLocate){
+function openBottomSheet(d, fromLocate, fromList){
   sheetOpenId = d.id;
+  _sheetFromList = !!fromList;
   sheetBody.innerHTML = sheetContentHtml(d);
   sheetBody.scrollTop = 0;
   bottomSheet.classList.add('show');
   sheetScrim.classList.add('show');
   document.body.classList.toggle('sheet-from-locate', !!fromLocate);
   // 返回按鈕文字與行為依來源切換
-  sheetBackBtn.textContent = fromLocate ? '← 回首頁' : '← 所有中心';
-  sheetBackBtn.dataset.backMode = fromLocate ? 'home' : 'map';
+  if(fromLocate){
+    sheetBackBtn.textContent = '← 回首頁';
+    sheetBackBtn.dataset.backMode = 'home';
+  } else if(fromList){
+    sheetBackBtn.textContent = '← 回清單';
+    sheetBackBtn.dataset.backMode = 'list';
+  } else {
+    sheetBackBtn.textContent = '← 所有中心';
+    sheetBackBtn.dataset.backMode = 'map';
+  }
   try{ map.invalidateSize(); }catch(e){}
 }
 function closeBottomSheet(){
   bottomSheet.classList.remove('show');
   sheetScrim.classList.remove('show');
+  const wasFromList = _sheetFromList;
   sheetOpenId = null;
-  // 非「找最近」情境：關閉後自動清 pin 並飛回全台灣視野。
-  // 延遲 120ms 是為了讓卡片的收合過渡動畫先跑完，避免跟 flyTo 的動畫互搶而被中斷。
-  if(!document.body.classList.contains('sheet-from-locate')){
+  _sheetFromList = false;
+  if(document.body.classList.contains('sheet-from-locate')){
+    // 「找最近」情境：不做額外動作（由 backHome 處理）
+  } else if(wasFromList){
+    // 從清單點進來：清 pin 並切回清單分頁，保留篩選狀態
     clearFocusPins();
-    // 清空搜尋欄位，確保地圖與搜尋狀態一致
+    setMobileView('list');
+  } else {
+    // 從地圖圓點或搜尋點進來：清 pin、清搜尋、飛回全圖
+    clearFocusPins();
     document.getElementById('q').value=''; q='';
     countySel.value=''; resetQuickpick();
     apply();
@@ -1349,12 +1365,13 @@ function closeBottomSheet(){
 sheetScrim.addEventListener('click', closeBottomSheet);
 sheetCloseBtn.addEventListener('click', closeBottomSheet);
 sheetBackBtn.addEventListener('click', ()=>{
-  if(sheetBackBtn.dataset.backMode === 'home'){
+  const mode = sheetBackBtn.dataset.backMode;
+  if(mode === 'home'){
     backHome();   // 「找最近」流程：回首頁選單
+  } else if(mode === 'list'){
+    closeBottomSheet();   // 從清單來：closeBottomSheet 內部會切回清單
   } else {
-    closeBottomSheet();
-    clearFocusPins();
-    flyHome(.7);  // 搜尋／點圖釘流程：清 pin + 飛回全圖
+    closeBottomSheet();   // 地圖/搜尋流程：closeBottomSheet 內部會清搜尋 + 飛回
   }
 });
 
