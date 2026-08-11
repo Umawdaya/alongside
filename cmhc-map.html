@@ -416,7 +416,7 @@ footer a{color:var(--ink)}
 </div>
 
 <!-- 版本戳記：用來確認線上跑的是哪一版，滑到頁面最底即可看到 -->
-<div class="buildstamp" id="buildStamp">版本 v.3.2608111727.1</div>
+<div class="buildstamp" id="buildStamp">版本 v.3.2608112126.1</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -1299,7 +1299,7 @@ tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
 // 版本戳記：開發者主控台可看到，用來確認線上跑的是哪一版
-console.log('[做伙行 心衛地圖] 版本 v.3.2608111727.1');
+console.log('[做伙行 心衛地圖] 版本 v.3.2608112126.1');
 
 /* ───────── 手機版 Bottom Sheet ───────── */
 const bottomSheet = document.getElementById('bottomSheet');
@@ -1321,7 +1321,7 @@ function sheetContentHtml(d){
   const countyBtn = cityArr.length >= 2
     ? `<button type="button" class="sheet-county-btn" onclick="window.switchToCounty('${d.city.replace(/'/g,"\\'")}')">
         <span class="scc-icon">📍</span>
-        <span class="scc-label">查看 ${d.city} 全部 ${cityArr.length} 處中心</span>
+        <span class="scc-label">查看 ${d.city} 其他心衛中心</span>
         <span class="scc-arrow">›</span>
        </button>`
     : '';
