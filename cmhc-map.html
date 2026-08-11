@@ -98,6 +98,8 @@ h1{font-size:24px;font-weight:900;margin-top:0;letter-spacing:1px}
 .card:hover{background:#fdfaf5}
 .card.hl{background:var(--cream)}
 .card-name{font-weight:700;font-size:14px;border-bottom:2.5px solid;display:inline-block;padding-bottom:2px}
+.card-map-hint{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:400;color:var(--sub);margin-left:7px;vertical-align:middle;opacity:.7;white-space:nowrap}
+.card:hover .card-map-hint{opacity:1;color:#4a6a40}
 .card-area{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.6}
 .card-area b{color:var(--ink);font-weight:500}
 .card-links{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
@@ -278,6 +280,11 @@ footer a{color:var(--ink)}
 .sheet-body .pp-links{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
 .sheet-body .pp-links .btn{font-size:13.5px;padding:9px 16px;border-radius:22px;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;gap:5px}
 .sheet-body img{width:100%;border-radius:10px;margin-bottom:10px;display:block}
+.sheet-county-btn{display:flex;align-items:center;gap:6px;width:100%;margin-top:12px;padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fdfaf5;color:var(--ink);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;text-align:left;transition:background .15s,border-color .15s}
+.sheet-county-btn:hover{background:var(--cream);border-color:#c4b49a}
+.sheet-county-btn .scc-icon{font-size:15px;flex-shrink:0}
+.sheet-county-btn .scc-label{flex:1}
+.sheet-county-btn .scc-arrow{color:var(--sub);font-size:12px;flex-shrink:0}
 @media (max-width:860px){
   .leaflet-popup{display:none!important}
 }
@@ -409,7 +416,7 @@ footer a{color:var(--ink)}
 </div>
 
 <!-- 版本戳記：用來確認線上跑的是哪一版，滑到頁面最底即可看到 -->
-<div class="buildstamp" id="buildStamp">版本 v.3.081112.10</div>
+<div class="buildstamp" id="buildStamp">版本 v.3.2608111727.1</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -752,7 +759,7 @@ function buildList(items){
     arr.forEach(d=>{
       const card = document.createElement('div'); card.className='card'; card.id='card-'+d.id;
       const fullName = (()=>{ const s=d.name.replace(cName,''); return (!s||s==='社區心理衛生中心')? d.name : s; })();
-      card.innerHTML=`<span class="card-name" style="border-color:${col}">${fullName}</span>
+      card.innerHTML=`<span class="card-name" style="border-color:${col}">${fullName}<span class="card-map-hint">🗺 查看地圖</span></span>
         <div class="card-area">服務區域：<b>${d.area||'—'}</b><br>${d.addr}${d.addrNote?`（${d.addrNote}）`:''}｜${d.tel}</div>
         <div class="card-links">${actionLinksHtml(d)}</div>`;
       card.addEventListener('click',()=>{
@@ -1292,7 +1299,7 @@ tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
 // 版本戳記：開發者主控台可看到，用來確認線上跑的是哪一版
-console.log('[做伙行 心衛地圖] 版本 v.3.081112.10');
+console.log('[做伙行 心衛地圖] 版本 v.3.2608111727.1');
 
 /* ───────── 手機版 Bottom Sheet ───────── */
 const bottomSheet = document.getElementById('bottomSheet');
@@ -1309,6 +1316,15 @@ function sheetContentHtml(d){
   const links = `<div class="pp-links">${actionLinksHtml(d)}</div>`;
   const photo = PHOTOS[d.id] ? `<img src="${PHOTOS[d.id]}" alt="${d.name}">` : '';
   const shortName = (()=>{ const s=d.name.replace(d.city,''); return (!s||s==='社區心理衛生中心')? d.name : s; })();
+  // 同縣市其他中心按鈕（同縣市 ≥ 2 筆時顯示）
+  const cityArr = (window._items||DATA).filter(x=>x.city===d.city);
+  const countyBtn = cityArr.length >= 2
+    ? `<button type="button" class="sheet-county-btn" onclick="window.switchToCounty('${d.city.replace(/'/g,"\\'")}')">
+        <span class="scc-icon">📍</span>
+        <span class="scc-label">查看 ${d.city} 全部 ${cityArr.length} 處中心</span>
+        <span class="scc-arrow">›</span>
+       </button>`
+    : '';
   return `${photo}<span class="pp-name" style="border-color:${c}">${shortName}</span>
     <div class="pp-row"><span class="k">服務區域</span><span>${d.area||'—'}</span></div>
     <div class="pp-row"><span class="k">地址</span><span>${d.addr}${d.addrNote?`（${d.addrNote}）`:''}</span></div>
@@ -1317,7 +1333,7 @@ function sheetContentHtml(d){
     ${d.fax?`<div class="pp-row"><span class="k">傳真</span><span>${d.fax}</span></div>`:''}
     ${d.email?`<div class="pp-row"><span class="k">Email</span><span><a href="mailto:${d.email}" style="color:#3d5a86">${d.email}</a></span></div>`:''}
     ${d.transport?`<div class="pp-row" style="align-items:flex-start;"><span class="k">交通</span><span style="font-size:12px;line-height:1.6;">${d.transport}</span></div>`:''}
-    ${links}`;
+    ${links}${countyBtn}`;
 }
 
 function openBottomSheet(d, fromLocate, fromList){
@@ -1374,6 +1390,19 @@ sheetBackBtn.addEventListener('click', ()=>{
     closeBottomSheet();   // 地圖/搜尋流程：closeBottomSheet 內部會清搜尋 + 飛回
   }
 });
+
+/* ── 縣市層切換：從卡片跳到同縣市所有中心 ── */
+window.switchToCounty = function(cName){
+  // 關閉目前卡片（不清搜尋、不飛回，由 focusCounty 接手）
+  bottomSheet.classList.remove('show');
+  sheetScrim.classList.remove('show');
+  sheetOpenId = null;
+  _sheetFromList = false;
+  document.body.classList.remove('sheet-from-locate');
+  clearFocusPins();
+  // 飛到縣市，落下所有圖釘；此後點圖釘開卡片，返回按鈕為「← 所有中心」
+  focusCounty(cName);
+};
 
 /* 下滑手勢關閉（觸控） */
 (function(){
