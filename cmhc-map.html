@@ -237,6 +237,16 @@ footer a{color:var(--ink)}
 #outlyModal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,92vw);max-height:86vh;overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.25);z-index:3200}
 #outlyModal.show{display:block}
 .outly-close-btn{position:absolute;right:12px;top:12px;width:32px;height:32px;border-radius:50%;border:none;background:var(--cream);color:var(--ink);font-size:16px;cursor:pointer;z-index:1;font-family:inherit}
+.outly-handle-row{display:none}
+.outly-back-btn{display:none}
+@media(max-width:860px){
+  #outlyModal{left:0;right:0;bottom:0;top:auto;transform:translateY(105%);width:100%;max-height:60vh;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);transition:transform .3s cubic-bezier(.32,.72,0,1);overflow-y:auto}
+  #outlyModal.show{transform:translateY(0)}
+  .outly-handle-row{display:flex;justify-content:center;align-items:center;padding:14px 0 6px;position:relative}
+  .outly-handle{width:38px;height:5px;border-radius:3px;background:#d8d0c2}
+  .outly-close-btn{position:absolute;right:14px;top:9px}
+  .outly-back-btn{display:block;position:absolute;left:14px;top:9px;border:none;background:none;color:var(--sub);font-size:12.5px;font-family:inherit;cursor:pointer;padding:6px 4px;line-height:1}
+}
 .outly-visual{padding:28px 20px 4px;text-align:center}
 .outly-visual svg{width:100%;max-width:200px;height:auto}
 .outly-map{width:100%;height:180px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
@@ -253,7 +263,7 @@ footer a{color:var(--ink)}
 /* ── 手機版 Bottom Sheet ── */
 #sheetScrim{position:fixed;inset:0;background:rgba(45,42,38,.35);z-index:2400;opacity:0;pointer-events:none;transition:opacity .28s}
 #sheetScrim.show{opacity:1;pointer-events:auto}
-#bottomSheet{position:fixed;left:0;right:0;bottom:0;z-index:2500;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);max-height:50vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);touch-action:none}
+#bottomSheet{position:fixed;left:0;right:0;bottom:0;z-index:2500;background:#fff;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(45,42,38,.28);max-height:44vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);touch-action:none}
 #bottomSheet.show{transform:translateY(0)}
 #bottomSheet.dragging{transition:none}
 .sheet-handle-row{flex-shrink:0;display:flex;justify-content:center;align-items:center;padding:14px 0 10px;cursor:grab;position:relative}
@@ -316,7 +326,7 @@ footer a{color:var(--ink)}
   <div class="select-row" id="selectRow" hidden>
     <div class="search" id="searchRow" hidden style="flex-basis:100%">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
-      <input id="q" type="search" placeholder="輸入鄉鎮市區（例：石門、大武）" autocomplete="off">
+      <input id="q" type="search" placeholder="輸入鄉鎮市區（例：大武、恆春、阿里山、新豐、石門）" autocomplete="off">
     </div>
   </div>
 </div>
@@ -368,7 +378,11 @@ footer a{color:var(--ink)}
   </div>
   <div id="outlyScrim"></div>
   <div id="outlyModal" role="dialog" aria-modal="true" aria-label="外島資訊">
-    <button type="button" class="outly-close-btn" id="outlyCloseBtn" aria-label="關閉">✕</button>
+    <div class="outly-handle-row" id="outlyHandleRow">
+      <div class="outly-handle"></div>
+      <button type="button" class="outly-back-btn" id="outlyBackBtn">← 所有中心</button>
+      <button type="button" class="outly-close-btn" id="outlyCloseBtn" aria-label="關閉">✕</button>
+    </div>
     <div class="outly-visual" id="outlyVisual"></div>
     <div class="outly-body sheet-body" id="outlyBody"></div>
   </div>
@@ -395,7 +409,7 @@ footer a{color:var(--ink)}
 </div>
 
 <!-- 版本戳記：用來確認線上跑的是哪一版，滑到頁面最底即可看到 -->
-<div class="buildstamp" id="buildStamp">版本 2026.08.10-2240</div>
+<div class="buildstamp" id="buildStamp">版本 v.3.081111.26</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -774,14 +788,23 @@ function focusCounty(cName){
   const arr = (window._items||DATA).filter(d=>d.city===cName);
   if(!arr.length) return;
   if(isOutlyingCity(cName)) return;   // 外島不在主地圖範圍內，改由外島小視窗處理
+  setMobileView('map');   // 手機：確保切到地圖分頁
   if(arr.length===1){
     map.flyTo([arr[0].lat,arr[0].lng],12,{duration:.8});
+    // 手機版單中心：飛到後直接開 bottom sheet
+    map.once('moveend',()=>setTimeout(()=>{
+      dropPins(arr);
+      if(isMobile()) openBottomSheet(arr[0]);
+    },150));
   }else{
     const b = L.featureGroup(arr.map(d=>markers[d.id])).getBounds().pad(.35);
     map.flyToBounds(b,{duration:.8,maxZoom:12});
+    // 縮放完成後，在各中心落下大圖釘（停留至下次操作）
+    map.once('moveend',()=>setTimeout(()=>{
+      dropPins(arr);
+      if(isMobile()) showToast('點選紅色圖釘查看各中心');
+    },150));
   }
-  // 縮放完成後，在各中心落下大圖釘（停留至下次操作）
-  map.once('moveend',()=>setTimeout(()=>dropPins(arr),150));
 }
 
 function dropPins(arr){
@@ -867,8 +890,11 @@ let focusLayer = null;
 function clearFocusPins(){
   if(focusLayer){ map.removeLayer(focusLayer); focusLayer = null; }
 }
-map.on('click', clearFocusPins);
-map.on('click', ()=>{ if(isMobile()) closeBottomSheet(); });
+map.on('click', ()=>{
+  clearFocusPins();
+  // 只在 bottom sheet 開著時才關閉並飛回；否則不做事，避免蓋掉 focusCounty 動畫
+  if(isMobile() && sheetOpenId !== null) closeBottomSheet();
+});
 
 function highlightCard(id,scroll){
   document.querySelectorAll('.card.hl').forEach(e=>e.classList.remove('hl'));
@@ -1128,9 +1154,50 @@ function openOutlyingModal(city){
 function closeOutlyModal(){
   outlyScrim.classList.remove('show');
   outlyModal.classList.remove('show');
+  // 手機版關閉時飛回全圖
+  if(isMobile()){
+    setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} flyHome(.7); }, 120);
+  }
 }
 outlyScrim.addEventListener('click', closeOutlyModal);
 outlyCloseBtn.addEventListener('click', closeOutlyModal);
+document.getElementById('outlyBackBtn').addEventListener('click', closeOutlyModal);
+
+/* 外島卡片下滑手勢關閉（手機版） */
+(function(){
+  const handleRow = document.getElementById('outlyHandleRow');
+  let startY=0, curY=0, dragging=false;
+  function onStart(e){
+    if(e.target.closest('#outlyCloseBtn')) return;
+    dragging = true;
+    startY = (e.touches? e.touches[0].clientY : e.clientY);
+    outlyModal.style.transition = 'none';
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('touchend', onEnd);
+  }
+  function onMove(e){
+    if(!dragging) return;
+    curY = (e.touches? e.touches[0].clientY : e.clientY);
+    const dy = Math.max(0, curY - startY);
+    if(dy>0 && e.cancelable) e.preventDefault();
+    outlyModal.style.transform = `translateY(${dy}px)`;
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging = false;
+    outlyModal.style.transition = '';
+    const dy = Math.max(0, curY - startY);
+    outlyModal.style.transform = '';
+    if(dy > 80){
+      closeOutlyModal();
+    } else {
+      outlyModal.style.transform = 'translateY(0)';
+    }
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+  }
+  handleRow.addEventListener('touchstart', onStart, {passive:true});
+})();
 
 // 金門、馬祖固定顯示在地圖左上角（Leaflet 自訂控制項），對應兩地實際地理位置在本島西北方；
 // 不用先點按鈕才看得到——兩個小方塊本身就是 outlyShapeSvg() 產生的示意圖示，跟開啟後彈窗裡的圖一致，點下去才叫 openOutlyingModal 顯示詳細資訊。
@@ -1225,7 +1292,7 @@ tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
 // 版本戳記：開發者主控台可看到，用來確認線上跑的是哪一版
-console.log('[做伙行 心衛地圖] 版本 2026.08.10-2240');
+console.log('[做伙行 心衛地圖] 版本 v.3.081111.26');
 
 /* ───────── 手機版 Bottom Sheet ───────── */
 const bottomSheet = document.getElementById('bottomSheet');
@@ -1272,6 +1339,10 @@ function closeBottomSheet(){
   // 延遲 120ms 是為了讓卡片的收合過渡動畫先跑完，避免跟 flyTo 的動畫互搶而被中斷。
   if(!document.body.classList.contains('sheet-from-locate')){
     clearFocusPins();
+    // 清空搜尋欄位，確保地圖與搜尋狀態一致
+    document.getElementById('q').value=''; q='';
+    countySel.value=''; resetQuickpick();
+    apply();
     setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} flyHome(.7); }, 120);
   }
 }
