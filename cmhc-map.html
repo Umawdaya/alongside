@@ -386,10 +386,10 @@ footer a{color:var(--ink)}
   </div>
   <div id="outlyScrim"></div>
   <div id="outlyModal" role="dialog" aria-modal="true" aria-label="外島資訊">
+    <button type="button" class="outly-close-btn" id="outlyCloseBtn" aria-label="關閉">✕</button>
     <div class="outly-handle-row" id="outlyHandleRow">
       <div class="outly-handle"></div>
-      <button type="button" class="outly-back-btn" id="outlyBackBtn">← 所有中心</button>
-      <button type="button" class="outly-close-btn" id="outlyCloseBtn" aria-label="關閉">✕</button>
+      <button type="button" class="outly-back-btn" id="outlyBackBtn">← 全國社區心衛中心</button>
     </div>
     <div class="outly-visual" id="outlyVisual"></div>
     <div class="outly-body sheet-body" id="outlyBody"></div>
@@ -417,7 +417,7 @@ footer a{color:var(--ink)}
 </div>
 
 <!-- 版本戳記：用來確認線上跑的是哪一版，滑到頁面最底即可看到 -->
-<div class="buildstamp" id="buildStamp">版本 v.3.2608121113.1</div>
+<div class="buildstamp" id="buildStamp">版本 v.3.2608121404.1</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -946,14 +946,8 @@ map.on('popupclose', e=>{
   _popupCloseTimer = setTimeout(()=>{
     _popupCloseTimer = null;
     clearSearchState();
-    if(byX && d && !isOutlyingCity(d.city)){
-      focusCounty(d.city);              // ✕：回該縣市層級
-    } else if(byX && d){
-      /* 外島：主地圖無此點，只清搜尋詞，鏡頭不動 */
-    } else {
-      clearFocusPins();
-      flyHome(.7);                      // 點空白／Esc：回全國地圖
-    }
+    clearFocusPins();
+    flyHome(.7);   // ✕ 或點空白：一律回全國地圖
   }, 30);
 });
 
@@ -968,12 +962,14 @@ function highlightCard(id,scroll){
 
 /* ── 篩選 ── */
 let region='all', q='', qCity='';
+function cityAlias(city){return({'連江縣':'馬祖馬祖縣連江','金門縣':'金門金馬','澎湖縣':'澎湖馬公'})[city]||'';
+}
 function apply(){
   const kw = q.trim();
   const items = DATA.filter(d=>{
     if(region!=='all' && d.region!==region) return false;
     if(qCity && d.city!==qCity) return false;
-    if(kw && !(d.name+d.city+d.area+d.addr).includes(kw)) return false;
+    if(kw && !(d.name+d.city+d.area+d.addr+cityAlias(d.city)).includes(kw)) return false;
     return true;
   });
   window._items = items;
@@ -1225,10 +1221,8 @@ function openOutlyingModal(city){
 function closeOutlyModal(){
   outlyScrim.classList.remove('show');
   outlyModal.classList.remove('show');
-  // 手機版關閉時飛回全圖
-  if(isMobile()){
-    setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} flyHome(.7); }, 120);
-  }
+  // 關閉時飛回全圖（手機＋桌面）
+  setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} clearFocusPins(); flyHome(.7); }, 120);
 }
 outlyScrim.addEventListener('click', closeOutlyModal);
 outlyCloseBtn.addEventListener('click', closeOutlyModal);
@@ -1363,7 +1357,7 @@ tabMap.addEventListener('click', ()=>{ document.body.classList.remove('list-only
 tabList.addEventListener('click', ()=>setMobileView('list'));
 
 // 版本戳記：開發者主控台可看到，用來確認線上跑的是哪一版
-console.log('[做伙行 心衛地圖] 版本 v.3.2608121113.1');
+console.log('[做伙行 心衛地圖] 版本 v.3.2608121404.1');
 
 /* ───────── 手機版 Bottom Sheet ───────── */
 const bottomSheet = document.getElementById('bottomSheet');
@@ -1416,7 +1410,7 @@ function openBottomSheet(d, fromLocate, fromList){
     sheetBackBtn.textContent = '← 回清單';
     sheetBackBtn.dataset.backMode = 'list';
   } else {
-    sheetBackBtn.textContent = '← 所有中心';
+    sheetBackBtn.textContent = '← 全國社區心衛中心';
     sheetBackBtn.dataset.backMode = 'map';
   }
   try{ map.invalidateSize(); }catch(e){}
